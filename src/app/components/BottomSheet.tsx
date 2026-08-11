@@ -23,6 +23,8 @@ interface BottomSheetProps {
   surfaceClassName?: string;
   /** Extra classes on the drawer (radius, padding, layout…). */
   className?: string;
+  /** Optional z-index for sheet overlay root (default 70). */
+  zIndex?: number;
   children: ReactNode;
 }
 
@@ -33,6 +35,7 @@ export function BottomSheet({
   handle = true,
   surfaceClassName = "bg-fy27-surface-tertiary",
   className = "",
+  zIndex = 70,
   children,
 }: BottomSheetProps) {
   useEffect(() => {
@@ -51,7 +54,7 @@ export function BottomSheet({
   return createPortal((
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[70] flex justify-center" style={{ fontFamily: "var(--font-sf-pro)" }}>
+        <div className="fixed inset-0 flex justify-center" style={{ fontFamily: "var(--font-sf-pro)", zIndex }}>
           <div className="relative w-full h-full max-w-[430px]">
             <motion.div
               className="absolute inset-0 bg-black/35"

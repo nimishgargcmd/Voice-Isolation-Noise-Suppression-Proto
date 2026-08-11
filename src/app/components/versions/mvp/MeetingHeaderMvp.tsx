@@ -151,6 +151,7 @@ function AudioRouteSheet({
       onClose={onClose}
       ariaLabel="Audio output"
       surfaceClassName="bg-fy27-surface-tertiary"
+      zIndex={110}
       className="px-0 pb-[max(14px,env(safe-area-inset-bottom))]"
     >
       <div className="py-[4px]">
