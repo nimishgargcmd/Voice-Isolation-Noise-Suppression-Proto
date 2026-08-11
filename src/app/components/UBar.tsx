@@ -121,9 +121,14 @@ export function UBar({
     }
   };
 
-  const handleMicPointerDown = () => {
+  const handleMicPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!onMicLongPress) return;
     micLongPressTriggeredRef.current = false;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Pointer capture can fail on some browsers; long-press still works.
+    }
     clearMicHoldTimer();
     micHoldTimerRef.current = setTimeout(() => {
       micLongPressTriggeredRef.current = true;
@@ -131,7 +136,15 @@ export function UBar({
     }, micLongPressMs);
   };
 
-  const handleMicPointerUp = () => {
+  const handleMicPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (micLongPressTriggeredRef.current) {
+      // Prevent touch-release from landing on an item in the freshly opened sheet.
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
     clearMicHoldTimer();
   };
 
