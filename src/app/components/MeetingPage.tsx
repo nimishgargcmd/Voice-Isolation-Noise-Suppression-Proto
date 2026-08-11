@@ -144,12 +144,11 @@ export function MeetingPage() {
   // prioritised 6-tile slot + overflow ParticipantTray, self encapsulated in the
   // tray (no floating PiP) when others > 6 or content is shared.
   const isMvpCheckpoint = activeVersionId === "mvp-checkpoint";
-  // Final Vision meeting screens are always dark — no theme awareness. Applying
-  // `.dark` to the meeting subtree redeclares every --fy27-*/shadcn token to its
-  // dark value (custom properties inherit down the DOM tree), so the entire
-  // in-meeting experience stays dark regardless of the global theme. FY27 MVP
-  // remains theme-aware and is unaffected.
-  const meetingThemeClass = isFy27Mvp ? "" : "dark";
+  // Meeting screens default to dark mode across variants. Applying `.dark` to
+  // the meeting subtree redeclares every --fy27-*/shadcn token to its dark
+  // value (custom properties inherit down the DOM tree), so in-meeting UI stays
+  // dark regardless of the global theme.
+  const meetingThemeClass = "dark";
 
   // ── Raised hands — single source of truth = ActiveMeetingContext.raisedHands (ids) ──
   const isHandRaised = meeting.raisedHands.includes(SELF_ID);
