@@ -1,10 +1,9 @@
 import React from "react";
-import { AudioModeGlyph } from "@/app/components/AudioModeIcon";
 
 type AudioModeOption = "off" | "noise-suppression" | "voice-isolation";
 
 interface AudioSettingListRowProps {
-  mode: AudioModeOption;
+  mode?: AudioModeOption;
   label: string;
   description: string;
   isSelected: boolean;
@@ -13,7 +12,6 @@ interface AudioSettingListRowProps {
 }
 
 export function AudioSettingListRow({
-  mode,
   label,
   description,
   isSelected,
@@ -38,12 +36,6 @@ export function AudioSettingListRow({
           </svg>
         ) : null}
       </span>
-
-      {mode !== "off" && (
-        <span className="mt-[1px] inline-flex items-center justify-center size-[22px] text-fy27-icon-primary shrink-0" aria-hidden="true">
-          <AudioModeGlyph mode={mode} size={12} />
-        </span>
-      )}
 
       <span className="min-w-0">
         <span className="block text-[17px] leading-[22px] tracking-[-0.41px] text-fy27-text-primary">

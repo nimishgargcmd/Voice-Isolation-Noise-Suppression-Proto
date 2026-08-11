@@ -61,7 +61,11 @@ const ID_TO_SHORT_NAME: Record<string, string> = Object.fromEntries(
 interface Notification extends NotificationConfig {
   id: number;
   type: "critical" | "informational";
+  // Stable identity for dedupe/snooze checks, independent of display copy.
+  nudgeId?: string;
 }
+
+const VOICE_ISOLATION_SPEAKER_NUDGE_ID = "voice-isolation-speaker-turn-off";
 
 export function MeetingPage() {
   const navigate = useNavigate();
@@ -629,7 +633,7 @@ export function MeetingPage() {
 
   const snoozeVoiceIsolationSpeakerPrompt = useCallback(() => {
     voiceIsolationSpeakerPromptSnoozeUntilRef.current = Date.now() + 2 * 60 * 1000;
-    if (currentNotificationRef.current?.heading?.includes("Multiple voices detected near your mic")) {
+    if (currentNotificationRef.current?.nudgeId === VOICE_ISOLATION_SPEAKER_NUDGE_ID) {
       dismissNotification();
     }
   }, [dismissNotification]);
@@ -654,11 +658,13 @@ export function MeetingPage() {
         triggerNotification({
           type: "informational",
           icon: "background-noise",
-          heading: "Background noise detected. Turn on Noise suppression?",
+          nudgeId: "noise-suppression-prompt",
+          heading: "Background noise detected",
+          body: "Noise suppression filters out sounds around you so others hear only your voice.",
           buttons: [
             { label: "Not now", variant: "outline", onClick: () => snoozeNoisePrompt() },
             {
-              label: "Turn on",
+              label: "Turn on Noise suppression",
               variant: "filled",
               onClick: () => {
                 setVoiceNoiseMode("noise-suppression");
@@ -683,7 +689,9 @@ export function MeetingPage() {
         triggerNotification({
           type: "informational",
           icon: "background-noise",
-          heading: "Multiple voices detected. Turn on Voice isolation?",
+          nudgeId: "voice-isolation-prompt",
+          heading: "Other voices detected",
+          body: "Voice isolation keeps only your voice audible and removes people talking nearby.",
           buttons: [
             {
               label: "Not now",
@@ -695,7 +703,7 @@ export function MeetingPage() {
               },
             },
             {
-              label: "Turn on",
+              label: "Turn on Voice isolation",
               variant: "filled",
               onClick: () => {
                 if (hasVoiceIsolationConsent) {
@@ -784,30 +792,32 @@ export function MeetingPage() {
     if (selectedAudioRoute !== "speaker") return;
     if (voiceNoiseMode !== "voice-isolation") return;
     if (!opts?.ignoreSnooze && Date.now() < voiceIsolationSpeakerPromptSnoozeUntilRef.current) return;
-    if (currentNotificationRef.current?.heading?.includes("Multiple voices detected near your mic")) return;
-    if (notificationQueueRef.current.some((n) => n.heading?.includes("Multiple voices detected near your mic"))) return;
+    if (currentNotificationRef.current?.nudgeId === VOICE_ISOLATION_SPEAKER_NUDGE_ID) return;
+    if (notificationQueueRef.current.some((n) => n.nudgeId === VOICE_ISOLATION_SPEAKER_NUDGE_ID)) return;
 
     triggerNotification({
       type: "informational",
       icon: "background-noise",
-      heading: "Multiple voices detected near your mic. Allow them by switching off Voice Isolation?",
+      nudgeId: VOICE_ISOLATION_SPEAKER_NUDGE_ID,
+      heading: "Others are speaking near your mic",
+      body: "Voice isolation is filtering them out. Switch it off so everyone in the room can be heard.",
       buttons: [
         {
-          label: "Keep On",
+          label: "Keep on",
           variant: "outline",
           onClick: () => {
             snoozeVoiceIsolationSpeakerPrompt();
           },
         },
         {
-          label: "Turn Off",
+          label: "Turn off Voice isolation",
           variant: "filled",
           onClick: () => {
             // R9.2: context-driven temporary turn off; preserve pre-prompt user preference.
             r92AutoRestoreVoiceIsolationRef.current = voiceIsolationUserPreferenceOnRef.current;
             setVoiceNoiseMode("noise-suppression");
             showToast("Voice isolation is switched off", "off", { iconMode: "voice-isolation", muted: true });
-            if (currentNotificationRef.current?.heading?.includes("Multiple voices detected near your mic")) {
+            if (currentNotificationRef.current?.nudgeId === VOICE_ISOLATION_SPEAKER_NUDGE_ID) {
               dismissNotification();
             }
           },
@@ -866,11 +876,13 @@ export function MeetingPage() {
     triggerNotification({
       type: "informational",
       icon: "background-noise",
-      heading: "Background noise detected. Turn on Noise suppression?",
+      nudgeId: "noise-suppression-prompt",
+      heading: "Background noise detected",
+      body: "Noise suppression filters out sounds around you so others hear only your voice.",
       buttons: [
         { label: "Not now", variant: "outline", onClick: () => snoozeNoisePrompt() },
         {
-          label: "Turn on",
+          label: "Turn on Noise suppression",
           variant: "filled",
           onClick: () => {
             setVoiceNoiseMode("noise-suppression");
