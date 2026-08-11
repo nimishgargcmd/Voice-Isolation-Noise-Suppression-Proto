@@ -738,6 +738,7 @@ export function MeetingPage() {
   const [voiceNoiseMode, setVoiceNoiseMode] = useState<"off" | "noise-suppression" | "voice-isolation">(meeting.voiceNoiseMode);
   const [selectedAudioRoute, setSelectedAudioRoute] = useState<"phone" | "speaker" | "off">("phone");
   const [isVoiceNoiseSheetOpen, setIsVoiceNoiseSheetOpen] = useState(false);
+  const suppressVoiceNoiseSheetTapUntilRef = useRef(0);
   const [isVoiceIsolationConsentOpen, setIsVoiceIsolationConsentOpen] = useState(false);
   const [hasVoiceIsolationConsent, setHasVoiceIsolationConsent] = useState<boolean>(() => {
     try {
@@ -928,10 +929,19 @@ export function MeetingPage() {
 
   const handleOpenVoiceNoiseSheet = useCallback(() => {
     if (!isMvpCheckpoint) return;
+    // Swallow the release/click that can follow a long-press and land in the opened sheet.
+    suppressVoiceNoiseSheetTapUntilRef.current = performance.now() + 550;
     // If a multitasking panel is open, close it before showing mode sheet.
     setActivePanel(null);
     setIsVoiceNoiseSheetOpen(true);
   }, [isMvpCheckpoint]);
+
+  const handleVoiceNoiseSheetCapture = useCallback((e: React.SyntheticEvent) => {
+    if (performance.now() < suppressVoiceNoiseSheetTapUntilRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, []);
 
   const handleAcceptVoiceIsolationConsent = useCallback(() => {
     if (!isMvpCheckpoint) return;
@@ -1317,7 +1327,11 @@ export function MeetingPage() {
                 Microphone settings
               </div>
             </div>
-            <div className="py-[4px]">
+              <div
+                className="py-[4px]"
+                onPointerUpCapture={handleVoiceNoiseSheetCapture}
+                onClickCapture={handleVoiceNoiseSheetCapture}
+              >
               {([
                 { id: "off", label: "Off", description: "No audio filtering." },
                 { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
