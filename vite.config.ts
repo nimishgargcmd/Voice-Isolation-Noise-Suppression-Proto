@@ -87,8 +87,15 @@ function openaiProxyPlugin(): Plugin {
 // Set VITE_NO_HTTPS=1 to serve plain HTTP (e.g. for the VSCode integrated
 // browser, which can't get past the self-signed cert).
 const useHttps = process.env.VITE_NO_HTTPS !== '1'
+// Optional base path for static hosts like GitHub Pages.
+const basePath = process.env.VITE_BASE_PATH || '/'
 
 export default defineConfig({
+  base: basePath,
+  server: {
+    // Required for temporary public tunnels (localhost.run/localtunnel) during demos.
+    allowedHosts: true,
+  },
   plugins: [
     figmaAssetPlugin(),
     openaiProxyPlugin(),
