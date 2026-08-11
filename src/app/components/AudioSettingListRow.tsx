@@ -39,9 +39,11 @@ export function AudioSettingListRow({
         ) : null}
       </span>
 
-      <span className="mt-[1px] inline-flex items-center justify-center size-[22px] text-fy27-icon-primary shrink-0" aria-hidden="true">
-        <AudioModeGlyph mode={mode} size={12} />
-      </span>
+      {mode !== "off" && (
+        <span className="mt-[1px] inline-flex items-center justify-center size-[22px] text-fy27-icon-primary shrink-0" aria-hidden="true">
+          <AudioModeGlyph mode={mode} size={12} />
+        </span>
+      )}
 
       <span className="min-w-0">
         <span className="block text-[17px] leading-[22px] tracking-[-0.41px] text-fy27-text-primary">
