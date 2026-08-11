@@ -929,8 +929,8 @@ export function MeetingPage() {
 
   const handleOpenVoiceNoiseSheet = useCallback(() => {
     if (!isMvpCheckpoint) return;
-    // Swallow the release/click that can follow a long-press and land in the opened sheet.
-    suppressVoiceNoiseSheetTapUntilRef.current = performance.now() + 550;
+    // Strict guard: ignore all immediate interactions after long-press sheet open.
+    suppressVoiceNoiseSheetTapUntilRef.current = performance.now() + 1600;
     // If a multitasking panel is open, close it before showing mode sheet.
     setActivePanel(null);
     setIsVoiceNoiseSheetOpen(true);
@@ -1329,6 +1329,7 @@ export function MeetingPage() {
             </div>
               <div
                 className="py-[4px]"
+                onPointerDownCapture={handleVoiceNoiseSheetCapture}
                 onPointerUpCapture={handleVoiceNoiseSheetCapture}
                 onClickCapture={handleVoiceNoiseSheetCapture}
               >
