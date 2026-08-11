@@ -63,9 +63,13 @@ interface Notification extends NotificationConfig {
   type: "critical" | "informational";
   // Stable identity for dedupe/snooze checks, independent of display copy.
   nudgeId?: string;
+  // Overrides DEFAULT_UFD_DISMISS_MS for nudges that need longer on stage.
+  autoDismissMs?: number;
 }
 
 const VOICE_ISOLATION_SPEAKER_NUDGE_ID = "voice-isolation-speaker-turn-off";
+const DEFAULT_UFD_DISMISS_MS = 4000;
+const VOICE_NOISE_NUDGE_DISMISS_MS = 10000;
 
 export function MeetingPage() {
   const navigate = useNavigate();
@@ -329,8 +333,8 @@ export function MeetingPage() {
       setCurrentNotification(next);
       currentNotificationTypeRef.current = next.type;
       setNotificationQueue(queue.slice(1));
-      // All UFDs auto-dismiss after 4s (including the lobby card).
-      notificationTimerRef.current = setTimeout(() => advanceNotification(), 4000);
+      // All UFDs auto-dismiss after 4s (including the lobby card) unless they override it.
+      notificationTimerRef.current = setTimeout(() => advanceNotification(), next.autoDismissMs ?? DEFAULT_UFD_DISMISS_MS);
     } else {
       setCurrentNotification(null);
       currentNotificationTypeRef.current = null;
@@ -342,7 +346,8 @@ export function MeetingPage() {
   const handleNotificationExpandChange = useCallback((expanded: boolean) => {
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
     if (!expanded) {
-      notificationTimerRef.current = setTimeout(() => advanceNotification(), 4000);
+      const duration = currentNotificationRef.current?.autoDismissMs ?? DEFAULT_UFD_DISMISS_MS;
+      notificationTimerRef.current = setTimeout(() => advanceNotification(), duration);
     }
   }, [advanceNotification]);
 
@@ -596,7 +601,7 @@ export function MeetingPage() {
       if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
       setCurrentNotification(newNotification);
       currentNotificationTypeRef.current = notification.type;
-      notificationTimerRef.current = setTimeout(() => advanceNotification(), 4000);
+      notificationTimerRef.current = setTimeout(() => advanceNotification(), newNotification.autoDismissMs ?? DEFAULT_UFD_DISMISS_MS);
       return;
     }
     if (currentType === "critical" && notification.type === "informational") return;
@@ -607,7 +612,7 @@ export function MeetingPage() {
     if (!currentType) {
       setCurrentNotification(newNotification);
       currentNotificationTypeRef.current = notification.type;
-      notificationTimerRef.current = setTimeout(() => advanceNotification(), 4000);
+      notificationTimerRef.current = setTimeout(() => advanceNotification(), newNotification.autoDismissMs ?? DEFAULT_UFD_DISMISS_MS);
     } else {
       setNotificationQueue(prev => [...prev, newNotification]);
     }
@@ -659,6 +664,7 @@ export function MeetingPage() {
           type: "informational",
           icon: "background-noise",
           nudgeId: "noise-suppression-prompt",
+          autoDismissMs: VOICE_NOISE_NUDGE_DISMISS_MS,
           heading: "Background noise detected",
           body: "Noise suppression filters out sounds around you so others hear only your voice.",
           buttons: [
@@ -690,6 +696,7 @@ export function MeetingPage() {
           type: "informational",
           icon: "background-noise",
           nudgeId: "voice-isolation-prompt",
+          autoDismissMs: VOICE_NOISE_NUDGE_DISMISS_MS,
           heading: "Other voices detected",
           body: "Voice isolation keeps only your voice audible and removes people talking nearby.",
           buttons: [
@@ -799,6 +806,7 @@ export function MeetingPage() {
       type: "informational",
       icon: "background-noise",
       nudgeId: VOICE_ISOLATION_SPEAKER_NUDGE_ID,
+      autoDismissMs: VOICE_NOISE_NUDGE_DISMISS_MS,
       heading: "Others are speaking near your mic",
       body: "Voice isolation is filtering them out. Switch it off so everyone in the room can be heard.",
       buttons: [
@@ -877,6 +885,7 @@ export function MeetingPage() {
       type: "informational",
       icon: "background-noise",
       nudgeId: "noise-suppression-prompt",
+      autoDismissMs: VOICE_NOISE_NUDGE_DISMISS_MS,
       heading: "Background noise detected",
       body: "Noise suppression filters out sounds around you so others hear only your voice.",
       buttons: [
@@ -1023,13 +1032,15 @@ export function MeetingPage() {
     }
     meeting.endMeeting();
     camera.releaseCamera();
-    navigate("/calendar");
+    // flushSync: the in-meeting 1s timers re-render this tree and starve the
+    // router's transition, leaving the URL on /calendar with MeetingPage still up.
+    navigate("/calendar", { flushSync: true });
   }, [navigate, meeting, camera]);
 
   // Back button — background the meeting and return to calendar
   const handleBack = useCallback(() => {
     meeting.backgroundMeeting();
-    navigate("/calendar");
+    navigate("/calendar", { flushSync: true });
   }, [meeting, navigate]);
 
   // AIL + UFD elements — shared by the in-flow layer (MVP/FV) and the checkpoint
