@@ -7,8 +7,8 @@ interface MeetingHeaderProps {
   onEndCall?: () => void;
   onBack?: () => void;
   isRecording?: boolean;
-  onAudioRouteChange?: (route: "phone" | "speaker" | "off") => void;
-  selectedAudioRoute?: "phone" | "speaker" | "off";
+  onAudioRouteChange?: (route: "phone" | "speaker" | "bluetooth") => void;
+  selectedAudioRoute?: "phone" | "speaker" | "bluetooth";
   /** When true, disables auto-hide and forces the header to stay visible (used in On-the-go mode). */
   alwaysVisible?: boolean;
   /** MVP checkpoint: floating overlay variant (only MeetingHeaderMvp honours it; FV ignores it). */

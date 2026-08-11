@@ -291,10 +291,10 @@ export function MeetingPage() {
   const noisePromptSnoozeUntilRef = useRef(0);
   const voiceIsolationSpeakerPromptSnoozeUntilRef = useRef(0);
   const voiceNoiseModeRef = useRef<"off" | "noise-suppression" | "voice-isolation">("noise-suppression");
-  const audioRouteRef = useRef<"phone" | "speaker" | "off">("phone");
+  const audioRouteRef = useRef<"phone" | "speaker" | "bluetooth">("phone");
   const voiceIsolationUserPreferenceOnRef = useRef(false);
   const r92AutoRestoreVoiceIsolationRef = useRef(false);
-  const previousAudioRouteRef = useRef<"phone" | "speaker" | "off">("phone");
+  const previousAudioRouteRef = useRef<"phone" | "speaker" | "bluetooth">("phone");
   const currentNotificationTypeRef = useRef<"critical" | "informational" | null>(null);
   // Keep a ref mirror of the queue so timer closures always see the latest value
   const notificationQueueRef = useRef<Notification[]>([]);
@@ -676,7 +676,7 @@ export function MeetingPage() {
       // R9.1 follows as the third in-order nudge: Record -> Noise -> Voice Isolation.
       demoVoicePromptTimerRef.current = setTimeout(() => {
         const multipleVoicesDetected = true;
-        const isEligibleAudioRoute = audioRouteRef.current === "phone";
+        const isEligibleAudioRoute = audioRouteRef.current !== "speaker";
         const isEligibleMode = voiceNoiseModeRef.current === "off" || voiceNoiseModeRef.current === "noise-suppression";
         if (!multipleVoicesDetected || !isEligibleAudioRoute || !isEligibleMode) return;
 
@@ -735,7 +735,7 @@ export function MeetingPage() {
   const handleAudioOnlyToggle = useCallback(() => { setIsAudioOnly((prev) => !prev); }, []);
   // MVP checkpoint-only in-meeting audio mode selector (noise + voice).
   const [voiceNoiseMode, setVoiceNoiseMode] = useState<"off" | "noise-suppression" | "voice-isolation">(meeting.voiceNoiseMode);
-  const [selectedAudioRoute, setSelectedAudioRoute] = useState<"phone" | "speaker" | "off">("phone");
+  const [selectedAudioRoute, setSelectedAudioRoute] = useState<"phone" | "speaker" | "bluetooth">("phone");
   const [isVoiceNoiseSheetOpen, setIsVoiceNoiseSheetOpen] = useState(false);
   const suppressVoiceNoiseSheetTapUntilRef = useRef(0);
   const [isVoiceIsolationConsentOpen, setIsVoiceIsolationConsentOpen] = useState(false);
@@ -763,7 +763,7 @@ export function MeetingPage() {
     }
   }, [isMvpCheckpoint]);
 
-  const handleAudioRouteChange = useCallback((route: "phone" | "speaker" | "off") => {
+  const handleAudioRouteChange = useCallback((route: "phone" | "speaker" | "bluetooth") => {
     audioRouteRef.current = route;
     setSelectedAudioRoute(route);
   }, []);
@@ -841,7 +841,7 @@ export function MeetingPage() {
 
     const previousRoute = previousAudioRouteRef.current;
     const movedToSpeaker = previousRoute !== "speaker" && selectedAudioRoute === "speaker";
-    const movedBackToHeadset = previousRoute === "speaker" && selectedAudioRoute === "phone";
+    const movedBackToHeadset = previousRoute === "speaker" && selectedAudioRoute !== "speaker";
 
     if (movedToSpeaker && voiceNoiseMode === "voice-isolation") {
       // Explicit user request: show R9.2 every time the route switches to speaker with VI on.

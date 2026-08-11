@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 
 /**
@@ -43,7 +44,11 @@ export function BottomSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  return (
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal((
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-[70] flex justify-center" style={{ fontFamily: "var(--font-sf-pro)" }}>
@@ -76,5 +81,5 @@ export function BottomSheet({
         </div>
       )}
     </AnimatePresence>
-  );
+  ), document.body);
 }

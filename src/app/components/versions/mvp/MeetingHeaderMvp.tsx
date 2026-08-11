@@ -37,8 +37,8 @@ interface MeetingHeaderMvpProps {
   onEndCall?: () => void;
   onBack?: () => void;
   isRecording?: boolean;
-  onAudioRouteChange?: (route: "phone" | "speaker" | "off") => void;
-  selectedAudioRoute?: "phone" | "speaker" | "off";
+  onAudioRouteChange?: (route: "phone" | "speaker" | "bluetooth") => void;
+  selectedAudioRoute?: "phone" | "speaker" | "bluetooth";
   /** When true, disables auto-hide and keeps the header pinned (On-the-go mode). */
   alwaysVisible?: boolean;
   /** MVP checkpoint: render as a floating rounded overlay bar (surface/floating +
@@ -111,7 +111,22 @@ function AudioOffIcon24() {
   );
 }
 
-type AudioRoute = "phone" | "speaker" | "off";
+type AudioRoute = "phone" | "speaker" | "bluetooth";
+
+/** Fluent Bluetooth 24 regular — currentColor. */
+function BluetoothIcon24() {
+  return (
+    <svg width={24} height={24} viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+      <path
+        d="M6.5 6.5L17.5 17.5L12 22V2L17.5 6.5L6.5 17.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function AudioRouteSheet({
   open,
@@ -127,7 +142,7 @@ function AudioRouteSheet({
   const routes: Array<{ id: AudioRoute; label: string; icon: ReactNode }> = [
     { id: "speaker", label: "Speaker", icon: <SpeakerIcon24 /> },
     { id: "phone", label: "iPhone", icon: <PhoneIcon24 /> },
-    { id: "off", label: "Audio off", icon: <AudioOffIcon24 /> },
+    { id: "bluetooth", label: "AirPods Pro", icon: <BluetoothIcon24 /> },
   ];
 
   return (
@@ -175,7 +190,7 @@ function AudioRouteSheet({
 
 function AudioRouteButtonIcon({ route }: { route: AudioRoute }) {
   if (route === "phone") return <PhoneIcon24 />;
-  if (route === "off") return <AudioOffIcon24 />;
+  if (route === "bluetooth") return <BluetoothIcon24 />;
   return <SpeakerIcon24 />;
 }
 
