@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meeting Dock — Design Principles</title>
+<style>
+  :root {
+    --purple: #5b5fc7;
+    --purple-soft: #eef0ff;
+    --purple-tint: #f6f7ff;
+    --ink: #1f2030;
+    --ink-soft: #4a4c63;
+    --mute: #6e708a;
+    --line: #e5e6f0;
+    --bg: #fbfbfd;
+    --card: #ffffff;
+    --ok: #2f9c5a;
+    --warn: #b95c00;
+    --bad: #c0392b;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(20,22,40,.04), 0 8px 24px rgba(20,22,40,.05);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 984px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  /* Two-column layout: sticky TOC sidebar + content */
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 24px;
+    padding-top: 56px;
+    align-self: flex-start;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+  }
+  .sidebar nav.toc { margin: 0; }
+  .layout > .wrap { flex: 0 1 984px; }
+  @media (max-width: 1024px) {
+    .layout { flex-direction: column; gap: 0; max-width: 984px; }
+    .sidebar { position: static; width: auto; padding: 24px 24px 0; max-height: none; overflow: visible; }
+  }
+
+  header.hero {
+    margin-bottom: 40px;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--purple); background: var(--purple-soft); padding: 6px 10px; border-radius: 999px;
+  }
+  h1 {
+    font-size: 36px; line-height: 1.15; margin: 18px 0 12px; letter-spacing: -0.02em;
+  }
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 60ch; }
+
+  nav.toc {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px; margin: 28px 0 36px; font-size: 14px;
+  }
+  nav.toc ol { margin: 6px 0 0; padding-left: 18px; color: var(--ink-soft); }
+  nav.toc li { margin: 4px 0; }
+  nav.toc a { color: var(--ink-soft); text-decoration: none; }
+  nav.toc a:hover { color: var(--purple); }
+
+  h2 {
+    font-size: 22px; margin: 48px 0 14px; letter-spacing: -0.01em;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  h2 .tag {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--mute); background: transparent; padding: 0;
+  }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  p { margin: 8px 0; color: var(--ink-soft); }
+  strong { color: var(--ink); }
+  code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--purple-soft); color: var(--purple); padding: 1px 6px; border-radius: 6px; }
+
+  .state-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0 8px;
+  }
+  .state {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px; box-shadow: var(--shadow);
+  }
+  .state h4 {
+    margin: 0 0 6px; font-size: 14px; font-weight: 700;
+    color: var(--purple); text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .state .mock {
+    height: 200px; border-radius: 10px; background: #f1f1f7; position: relative; margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .state .surface {
+    position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #ececf5 0 14px, #f5f5fb 14px 28px);
+  }
+  .state .dock {
+    position: absolute; top: 20px; left: 20px; right: 20px;
+    background: var(--purple); color: white;
+    border-radius: 8px; font-size: 10px; padding: 4px 8px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .state .dock .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  }
+  .state .dock .row .controls {
+    display: flex; gap: 4px; opacity: 0.85;
+  }
+  .state .dock .row .dot {
+    width: 10px; height: 10px; border-radius: 3px; background: rgba(255,255,255,0.45);
+  }
+  .state .dock .tiles {
+    display: flex; gap: 4px; height: 56px;
+  }
+  .state .dock .tile {
+    flex: 1; border-radius: 6px; background: rgba(255,255,255,0.18);
+  }
+  .state .dock .handle {
+    width: 36px; height: 4px; border-radius: 999px;
+    background: rgba(255,255,255,0.55);
+    margin: 4px auto 0;
+  }
+  .state.expanded .dock { padding: 6px 8px 6px; }
+  .state.collapsed .dock { padding: 5px 8px 5px; }
+  .state.minimized .dock {
+    left: 44px; right: 44px;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .state p { font-size: 13px; margin: 4px 0; }
+
+  details.principle {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 0; margin: 12px 0; box-shadow: var(--shadow); overflow: hidden;
+  }
+  details.principle[open] { border-color: var(--purple); }
+  details.principle summary {
+    list-style: none; cursor: pointer; padding: 16px 18px;
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 600; color: var(--ink);
+  }
+  details.principle summary::-webkit-details-marker { display: none; }
+  details.principle summary::after {
+    content: "+"; margin-left: auto; color: var(--mute); font-size: 18px; line-height: 1;
+    transition: transform .15s ease;
+  }
+  details.principle[open] summary::after { content: "−"; }
+  details.principle .id {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--purple-soft); color: var(--purple); font-size: 12px; font-weight: 700;
+  }
+  details.principle .body { padding: 0 18px 18px 58px; }
+  details.principle .body p:first-child { margin-top: 0; }
+  .test {
+    background: var(--purple-tint); border-left: 3px solid var(--purple);
+    padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0 4px;
+    font-size: 14px; color: var(--ink-soft);
+  }
+  .test strong { color: var(--purple); }
+
+  .copybtn {
+    appearance: none; border: 1px solid var(--line); background: var(--card);
+    border-radius: 8px; padding: 4px 10px; font-size: 12px; color: var(--mute); cursor: pointer;
+    transition: all .12s ease;
+  }
+  .copybtn:hover { color: var(--purple); border-color: var(--purple); }
+  .copybtn.ok { color: var(--ok); border-color: var(--ok); }
+
+  .rubric { margin-top: 18px; }
+
+  .qcard {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin: 14px 0;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .qcard.has-yes {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 4px rgba(91,95,199,0.08);
+  }
+  .qhead {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 12px;
+  }
+  .qnum {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 999px;
+    background: var(--purple); color: white;
+    font-weight: 700; font-size: 13px; letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+  .qtitle {
+    font-weight: 600; font-size: 16px; color: var(--ink);
+    margin: 0; line-height: 1.4;
+  }
+  .qcard .qhint {
+    font-size: 14px; color: var(--ink-soft); margin: 0 0 12px;
+    line-height: 1.55;
+  }
+  .qcard .qex {
+    font-size: 13px; color: var(--ink-soft);
+    background: var(--purple-tint);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 0 0 16px;
+    line-height: 1.55;
+    font-style: normal;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .qcard .qex .ex-tag {
+    display: inline-block; font-weight: 700; font-size: 10px;
+    padding: 2px 8px; border-radius: 999px; margin-right: 8px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    vertical-align: 1px;
+  }
+  .qcard .qex .ex-tag.yes { background: #d8f5e3; color: #1d7a3f; }
+  .qcard .qex .ex-tag.no { background: #ececf3; color: #6e708a; }
+  .qbuttons { display: flex; gap: 10px; margin-top: 4px; }
+  .qbtn {
+    flex: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 18px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px; font-weight: 600;
+    background: var(--card);
+    color: var(--ink-soft);
+    transition: all .12s;
+    user-select: none;
+  }
+  .qbtn:hover { border-color: var(--purple); color: var(--purple); }
+  .qbtn { font-family: inherit; }
+  .qbtn.yes.selected {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: white;
+  }
+  .qbtn.no.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: white;
+  }
+  .qcard.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity .15s;
+  }
+
+  .verdict {
+    margin-top: 28px;
+    padding: 26px 28px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #5b5fc7 0%, #4448a3 100%);
+    color: white;
+    border: none;
+  }
+  .verdict h4 {
+    margin: 0 0 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.78);
+    font-weight: 600;
+  }
+  .verdict .answer {
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 12px;
+    line-height: 1.3;
+  }
+  .verdict .reason {
+    font-size: 14px;
+    color: rgba(255,255,255,0.92);
+    margin-top: 6px;
+    line-height: 1.55;
+  }
+  .verdict .reason strong { color: white; font-weight: 600; }
+  .verdict.empty {
+    background: #f8f8fb;
+    border: 1.5px dashed var(--line);
+    color: var(--mute);
+  }
+  .verdict.empty h4 { color: var(--mute); }
+  .verdict.empty .answer { color: var(--mute); font-size: 15px; font-weight: 500; }
+
+  .surfacemap { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  .surfacemap th, .surfacemap td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .surfacemap th { color: var(--mute); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .surfacemap td .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.exp { background: #e7f8ee; color: var(--ok); }
+  .badge.col { background: #fff4e0; color: var(--warn); }
+  .badge.min { background: #fde7e3; color: var(--bad); }
+
+  footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--mute); font-size: 13px; }
+
+  @media print {
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    html, body { background: #fff; font-size: 10.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    nav.toc, .sidebar { display: none; }
+    .layout { display: block; max-width: none; }
+    .copybtn { display: none !important; }
+    /* Strip shadows everywhere in print — they can bleed across page breaks in Chromium */
+    *, *::before, *::after { box-shadow: none !important; }
+    /* Force all collapsibles open and never break inside an individual principle */
+    details.principle { border-color: var(--line) !important; break-inside: avoid; page-break-inside: avoid; }
+    details.principle summary::after { display: none !important; }
+    details.principle summary { cursor: default; }
+    details.principle .body { display: block !important; padding: 0 18px 18px 58px !important; }
+    /* Page break behavior */
+    h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; widows: 3; orphans: 3; }
+    h2 { break-before: page; page-break-before: page; margin-top: 0; padding-top: 0; }
+    h2#scope { break-before: auto; page-break-before: auto; }
+    h2 + p { break-before: avoid; page-break-before: avoid; }
+    p, li { widows: 3; orphans: 3; }
+    /* Replace CSS Grid with flexbox for print — Chromium's print engine handles grid poorly */
+    .state-grid {
+      display: flex !important; flex-wrap: wrap; gap: 12px;
+      break-inside: auto; page-break-inside: auto;
+    }
+    .state-grid > .state { flex: 1 1 30%; min-width: 28%; break-inside: avoid; page-break-inside: avoid; }
+    .gallery-grid {
+      display: flex !important; flex-wrap: wrap; gap: 12px;
+      break-inside: auto; page-break-inside: auto;
+    }
+    /* Lock each shot to ~1/3 width. Never grow — a solo card on a row must stay 1/3 wide, not stretch to 100% (which would make it 2x taller than a page). */
+    .gallery-grid > .shot {
+      flex: 0 0 calc(33.333% - 8px) !important;
+      max-width: calc(33.333% - 8px) !important;
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    /* If a group has only 2 shots, give them ~half width each so the row doesn't look sparse. */
+    .gallery-group:has(.shot:nth-child(2):last-child) .gallery-grid > .shot {
+      flex: 0 0 calc(50% - 6px) !important;
+      max-width: calc(50% - 6px) !important;
+    }
+    .gallery-group { break-inside: auto; page-break-inside: auto; }
+    .surfacemap { break-inside: auto; page-break-inside: auto; }
+    .surfacemap tr { break-inside: avoid; page-break-inside: avoid; }
+    .rubric { break-inside: auto; page-break-inside: auto; }
+    .qcard { break-inside: avoid; page-break-inside: avoid; box-shadow: none !important; }
+    /* Keep lede paragraphs with their headings */
+    .grouplede { break-after: avoid; page-break-after: avoid; }
+    /* State mocks */
+    .state .mock { break-inside: avoid; page-break-inside: avoid; height: 150px; }
+    .shot .frame { break-inside: avoid; page-break-inside: avoid; }
+    /* Print-friendly link styling */
+    a { color: inherit; text-decoration: none; }
+    code { background: #f0f0f6; }
+    /* Rubric: hide answer buttons and live verdict in print */
+    .qbuttons { display: none; }
+    #verdict { display: none; }
+    /* Footer always at end */
+    footer { break-before: avoid; page-break-before: avoid; }
+  }
+
+  .gallery { margin: 14px 0 8px; }
+  .gallery-group { margin: 22px 0 28px; }
+  .gallery-group h3 { margin: 0 0 4px; }
+  .gallery-group .grouplede { font-size: 13px; color: var(--mute); margin: 0 0 12px; }
+  .gallery-grid {
+    display: flex; flex-wrap: wrap; gap: 14px;
+  }
+  .gallery-grid > .shot {
+    flex: 0 0 calc(33.333% - 10px);
+    max-width: calc(33.333% - 10px);
+  }
+  .gallery-group:has(.shot:nth-child(2):last-child) .gallery-grid > .shot {
+    flex: 0 0 calc(50% - 7px);
+    max-width: calc(50% - 7px);
+  }
+  .shot {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow); display: flex; flex-direction: column;
+  }
+  .shot .frame {
+    background: var(--purple-tint); aspect-ratio: 4 / 7; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+  }
+  .shot .frame img {
+    width: auto; height: auto; max-width: 80%; max-height: 86%;
+    object-fit: contain; display: block; margin: auto;
+  }
+  .shot .frame .placeholder {
+    color: var(--mute); font-size: 12px; text-align: center; padding: 12px;
+  }
+  .shot .meta { padding: 10px 12px; font-size: 12px; }
+  .shot .meta .label { font-weight: 600; color: var(--ink); }
+  .shot .meta .sub { color: var(--mute); margin-top: 2px; }
+  /* Hide placeholder when img loads successfully */
+  .shot .frame img + .placeholder { display: none; }
+  .shot .frame img[data-broken="true"] + .placeholder { display: block; }
+  .shot .frame img[data-broken="true"] { display: none; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="sidebar">
+  <nav class="toc">
+    <strong>On this page</strong>
+    <ol>
+      <li><a href="#scope">Scope — what the dock is for</a></li>
+      <li><a href="#states">The three states</a></li>
+      <li><a href="#surfaces">Surface map (today)</a></li>
+      <li><a href="#examples">Examples from the IA</a></li>
+      <li><a href="#vision">Vision principles</a></li>
+      <li><a href="#operational">Operational principles</a></li>
+      <li><a href="#rubric">Decision rubric (interactive)</a></li>
+    </ol>
+  </nav>
+</aside>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Mobile Teams Multitasking · Meeting dock</span>
+  <h1>Design principles for the Meeting dock</h1>
+  <p class="lede">Principles and a decision tree for the Meeting dock. The principles explain how the dock behaves and why; the decision tree picks the right variant when you add a new surface to the IA. Each principle is a single rule, an example, and a literal check you can run on a mockup.</p>
+</header>
+
+<h2 id="scope"><span class="tag">01</span> Scope — what the dock is for</h2>
+<p>Before applying the principles below, confirm the surface you're designing for is within the dock's scope.</p>
+<ul style="color:var(--ink-soft); padding-left: 20px;">
+  <li><strong>The dock is the Picture-in-Picture (PiP) replacement</strong> in Teams Mobile. It is shown only when the user has joined and is currently in an ongoing meeting or call.</li>
+  <li>It appears <strong>only on the surfaces where PiP currently appears</strong> in Teams Mobile (the L0/L1/L2 pages enumerated in the surface map below). On any page where PiP never appeared, the dock should not appear either.</li>
+  <li><strong>The pattern is reserved for ongoing meetings and calls.</strong> Do not reuse this top-anchored, three-state form factor for any other persistent UI — draft autosave indicators, recording playback, scheduled-meeting reminders, sticky banner promotions, etc.</li>
+</ul>
+<div class="test"><strong>Violated if:</strong> a non-meeting feature uses the same top-anchored dock form factor (e.g., a "draft saved" pill that mimics Minimized), OR the dock appears on a Teams Mobile page where PiP never appeared, OR the dock appears while the user is not currently in a meeting or call.</div>
+
+<h2 id="states"><span class="tag">02</span> The three states</h2>
+<p>Today the dock takes three forms across the IA. They share a position (top of the surface) and differ in how much of that region they claim.</p>
+
+<div class="state-grid">
+  <div class="state expanded">
+    <h4>Expanded</h4>
+    <div class="mock">
+      <div class="surface"></div>
+      <div class="dock">
+        <div class="row"><span>Marketing Team Sync</span><span class="controls"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>
+        <div class="tiles"><div class="tile"></div><div class="tile"></div></div>
+        <div class="handle"></div>
+      </div>
+    </div>
+    <p><strong>Header + tiles + drag handle.</strong> Full meeting presence: active speaker / shared content + self-view + controls. Handle invites drag-to-collapse.</p>
+  </div>
+  <div class="state collapsed">
+    <h4>Collapsed</h4>
+    <div class="mock">
+      <div class="surface"></div>
+      <div class="dock">
+        <div class="row"><span>Marketing Team Sync · 15:30</span><span class="controls"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>
+        <div class="handle"></div>
+      </div>
+    </div>
+    <p><strong>Header only, handle retained.</strong> Controls stay visible; tiles drop away. Handle invites drag-to-expand.</p>
+  </div>
+  <div class="state minimized">
+    <h4>Minimized</h4>
+    <div class="mock">
+      <div class="surface"></div>
+      <div class="dock">
+        <div class="row"><span>15:30 · 12 in call</span><span>›</span></div>
+      </div>
+    </div>
+    <p><strong>Slim pill, no handle.</strong> Timer + return chevron. The pill itself is the tap target; no drag affordance.</p>
+  </div>
+</div>
+<p style="font-size:13px; color:var(--mute); margin-top:14px;">All three states live at the top of the surface, just under the status bar. What changes between them is <em>how much vertical real estate the meeting claims</em>, not where it sits.</p>
+
+<h2 id="surfaces"><span class="tag">03</span> Surface map (today)</h2>
+<p>Every surface in the current IA, and the dock variant that appears on it. "A → B" means the variant starts as A and changes to B under a specific trigger.</p>
+<table class="surfacemap">
+  <thead><tr><th>Surface</th><th>Variant</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>L0 — Activity, Chat list, Calendar, Calls, More</td><td><span class="badge exp">Expanded</span> → <span class="badge col">Collapsed</span></td><td>Default Expanded. Collapses when the user scrolls down on any of these tabs.</td></tr>
+    <tr><td>L1 — 1:1 chat, group chat, threaded channel</td><td><span class="badge exp">Expanded</span> → <span class="badge col">Collapsed</span></td><td>Default Expanded. Collapses when the keyboard opens, or when the user scrolls down through messages.</td></tr>
+    <tr><td>L2 — Thread reply inside threaded channel</td><td><span class="badge exp">Expanded</span> → <span class="badge col">Collapsed</span></td><td>Behaves like L1 Chat — same keyboard and scroll triggers.</td></tr>
+    <tr><td>L1 — Unthreaded channel (post feed)</td><td><span class="badge exp">Expanded</span> → <span class="badge col">Collapsed</span></td><td>Default Expanded. Collapses on scroll through the post feed.</td></tr>
+    <tr><td>L2 — Unthreaded channel "New post"</td><td><span class="badge min">Minimized</span></td><td>The compose drawer IS the surface (Q1 of the rubric). Dock retreats to a pill.</td></tr>
+    <tr><td>L1 — Catchup (swipe cards)</td><td><span class="badge min">Minimized</span></td><td>Immersive single-task triage (Q2 of the rubric). Attention is the constraint.</td></tr>
+    <tr><td>L2 — Catchup → reply / new post</td><td><span class="badge min">Minimized</span></td><td>Continues Catchup's immersion, and the destination itself is a drawer.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="examples"><span class="tag">04</span> Examples from the IA</h2>
+<p>Each dock state, shown on the surfaces where it currently appears.</p>
+
+<div class="gallery">
+
+  <div class="gallery-group">
+    <h3>Expanded</h3>
+    <p class="grouplede">Header + tiles. Used when the surface can spare the room.</p>
+    <div class="gallery-grid">
+      <div class="shot">
+        <div class="frame"><img src="screenshots/l0-chat-expanded.png" alt="L0 Chat with expanded dock" onerror="this.dataset.broken='true'"><div class="placeholder">l0-chat-expanded.png</div></div>
+        <div class="meta"><div class="label">L0 — Chat list</div><div class="sub">Expanded · header + tiles</div></div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="screenshots/l1-threaded-channel-expanded.png" alt="L1 threaded channel with expanded dock, no keyboard" onerror="this.dataset.broken='true'"><div class="placeholder">l1-threaded-channel-expanded.png</div></div>
+        <div class="meta"><div class="label">L1 — Threaded channel</div><div class="sub">Expanded · keyboard dismissed</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-group">
+    <h3>Collapsed</h3>
+    <p class="grouplede">Header only. Used when the surface needs vertical room for typing or scrolling.</p>
+    <div class="gallery-grid">
+      <div class="shot">
+        <div class="frame"><img src="screenshots/l1-chat-collapsed-keyboard.png" alt="L1 1:1 chat with keyboard up, dock collapsed" onerror="this.dataset.broken='true'"><div class="placeholder">l1-chat-collapsed-keyboard.png</div></div>
+        <div class="meta"><div class="label">L1 — 1:1 chat (keyboard up)</div><div class="sub">Collapsed · keyboard forced</div></div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="screenshots/l1-threaded-channel-collapsed.png" alt="L1 threaded channel with keyboard up, dock collapsed" onerror="this.dataset.broken='true'"><div class="placeholder">l1-threaded-channel-collapsed.png</div></div>
+        <div class="meta"><div class="label">L1 — Threaded channel (keyboard up)</div><div class="sub">Collapsed · keyboard forced</div></div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="screenshots/l1-unthreaded-channel-collapsed.png" alt="L1 unthreaded channel feed with collapsed dock" onerror="this.dataset.broken='true'"><div class="placeholder">l1-unthreaded-channel-collapsed.png</div></div>
+        <div class="meta"><div class="label">L1 — Unthreaded channel</div><div class="sub">Collapsed · default</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-group">
+    <h3>Minimized</h3>
+    <p class="grouplede">Slim pill. Used for immersive flows or surfaces whose layout takes the dock's normal habitat.</p>
+    <div class="gallery-grid">
+      <div class="shot">
+        <div class="frame"><img src="screenshots/l2-unthreaded-newpost-minimized.png" alt="L2 New post in unthreaded channel, dock minimized" onerror="this.dataset.broken='true'"><div class="placeholder">l2-unthreaded-newpost-minimized.png</div></div>
+        <div class="meta"><div class="label">L2 — Unthreaded "New post"</div><div class="sub">Minimized · drawer occupies layout</div></div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="screenshots/catchup-l1.png" alt="L1 Catchup card stack with dock minimized" onerror="this.dataset.broken='true'"><div class="placeholder">catchup-l1.png</div></div>
+        <div class="meta"><div class="label">L1 — Catchup</div><div class="sub">Minimized · immersion</div></div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="screenshots/catchup-l2-respond.png" alt="L2 from Catchup respond to chat" onerror="this.dataset.broken='true'"><div class="placeholder">catchup-l2-respond.png</div></div>
+        <div class="meta"><div class="label">L2 — Catchup respond</div><div class="sub">Minimized · carries Catchup immersion</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2 id="vision"><span class="tag">05</span> Vision principles</h2>
+<p>Three rules about <em>what the dock is</em>. Use these when the operational principles don't clearly settle a question, or to explain a design choice in a review.</p>
+
+<details class="principle" open>
+  <summary><span class="id">V1</span> The dock keeps the user IN the meeting, not next to it.
+    <button class="copybtn" data-copy="V1. The dock keeps the user IN the meeting, not next to it. The dock is the meeting shown at a smaller size — the user is still on camera, still audible, still being timed.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> The dock is the meeting itself, shown at a smaller size. It is not a notification, a reminder, or a return-to-meeting button. In every state, the user is still on camera, still audible to other participants, and still being timed.</p>
+    <p><strong>Example.</strong> The Minimized pill at the top of Catchup reads "15:30 · 12 in call" with a live timer. The user is participating in the meeting while triaging chats — not "running it in the background."</p>
+    <figure style="margin: 12px auto 6px; padding: 0; max-width: 360px; text-align: center;">
+      <div style="background: var(--purple-tint); border-radius: 12px; padding: 18px 20px;">
+        <img src="screenshots/v1-pill-closeup.png" alt="Close-up of the Minimized dock pill on Catchup, showing 'Marketing Team Sync · 15:30 · 12 in call' with a live timer." style="width: 100%; max-width: 280px; border-radius: 8px; display: block; margin: 0 auto;" />
+      </div>
+      <figcaption style="font-size: 12px; color: var(--mute); margin-top: 8px;">Minimized pill on Catchup. Live timer + participant count signal continued participation, not a notification.</figcaption>
+    </figure>
+    <div class="test"><strong>Violated if:</strong> a user, looking at any dock state, would describe the meeting as "running in the background" the way a Slack call notification does.</div>
+  </div>
+</details>
+
+<details class="principle">
+  <summary><span class="id">V2</span> The dock changes shape; the surface keeps its layout.
+    <button class="copybtn" data-copy="V2. The dock changes shape; the surface keeps its layout. The surface naturally gets less vertical area because the dock sits above it — but it doesn't restructure, drop content, or hide functionality to accommodate the dock. The dock is the one that changes shape between Expanded, Collapsed, and Minimized.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> When the dock is present, the surface naturally has less vertical room to render in — the dock sits at the top of the screen. That's expected. What the surface should <em>not</em> do is change its own layout, drop content, hide functionality, or reflow its primary UI in response to the dock. The dock is the one that changes shape — Expanded → Collapsed → Minimized — to claim less or more of the top region. The surface just renders within whatever's left.</p>
+    <p><strong>Example.</strong> When the user opens Catchup, the dock shrinks to a Minimized pill (claiming a small strip at the top). The Catchup card stack renders in the remaining space with its full layout — same card size, same swipe affordances, same controls. It didn't shrink any element or hide any feature to "fit the dock"; the dock is the one that yielded.</p>
+    <div class="test"><strong>Violated if:</strong> a surface drops content, restructures its primary layout, hides functionality, or reflows its main UI in order to coexist with the dock. (The baseline reduction in available height — because the dock sits above the surface — doesn't count; that's expected.)</div>
+  </div>
+</details>
+
+<details class="principle">
+  <summary><span class="id">V3</span> Density signals priority. Position does not change.
+    <button class="copybtn" data-copy="V3. Density signals priority. Position does not change. The dock sits at the top of the screen in all three states. What varies is how much of the top region it claims — never where on the screen it sits.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> The dock sits at the top of the screen in all three states. What varies between Expanded, Collapsed, and Minimized is <em>how much of the top region</em> the dock claims — never <em>where</em> on the screen it sits.</p>
+    <ul style="color:var(--ink-soft); margin: 6px 0 8px; padding-left: 20px;">
+      <li><strong>Expanded</strong> — header + tiles. Largest claim.</li>
+      <li><strong>Collapsed</strong> — header only. Medium claim.</li>
+      <li><strong>Minimized</strong> — slim pill. Smallest claim.</li>
+    </ul>
+    <div class="test"><strong>Violated if:</strong> a proposed design moves the dock to the bottom, to a side, floats it over content, or anchors it anywhere other than the top edge.</div>
+  </div>
+</details>
+
+<h2 id="operational"><span class="tag">06</span> Operational principles</h2>
+<p>Five rules about <em>how the dock behaves</em>. These tie directly to surface design and code. If two rules seem to conflict, fall back to the vision principles to settle it.</p>
+
+<details class="principle">
+  <summary><span class="id">O1</span> Three states. No fourth.
+    <button class="copybtn" data-copy="O1. Three states. No fourth. Expanded, Collapsed, Minimized cover every surface in the IA. If a new surface seems to need a fourth form, redesign the surface — don't add a fourth state.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> Expanded, Collapsed, Minimized. Every surface in the IA today fits one of these three. New surfaces should too.</p>
+    <div class="test"><strong>Violated if:</strong> a new design uses a side-rail, corner float, half-sheet, or any form that isn't one of the three. The fix is to redesign the surface, not to add a fourth dock state.</div>
+  </div>
+</details>
+
+<details class="principle">
+  <summary><span class="id">O2</span> Collapse handles space. Minimize handles layout or attention.
+    <button class="copybtn" data-copy="O2. Collapse handles space. Minimize handles layout or attention. Collapse the dock when the surface needs the vertical space temporarily (keyboard, scroll). Minimize the dock when the surface IS a drawer, or when it demands undivided focus.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule — two triggers, two responses:</strong></p>
+    <ul style="color:var(--ink-soft); margin: 6px 0 10px; padding-left: 20px;">
+      <li><strong>Collapse</strong> when the surface <em>temporarily</em> needs the vertical space the dock occupies. Triggers: the keyboard appears; the user scrolls down through a long list.</li>
+      <li><strong>Minimize</strong> when the surface either (a) <em>is itself</em> a drawer or sheet that defines the page, or (b) demands undivided user attention.</li>
+    </ul>
+    <p><strong>Example.</strong></p>
+    <ul style="color:var(--ink-soft); margin: 6px 0 8px; padding-left: 20px;">
+      <li>Keyboard appears on L1 Chat → Collapse. The keyboard will dismiss later; controls stay reachable.</li>
+      <li>L2 New Post → Minimize. The drawer IS the page.</li>
+      <li>L1 Catchup → Minimize. Triage demands focus.</li>
+    </ul>
+    <figure style="margin: 12px 0 6px; padding: 0;">
+      <div style="display: flex; gap: 12px;">
+        <div style="flex: 1 1 0; min-width: 0; background: var(--purple-tint); border-radius: 12px; padding: 18px 16px; text-align: center;">
+          <img src="screenshots/l1-chat-collapsed-keyboard.png" alt="L1 1:1 chat with keyboard up, dock Collapsed at the top showing the header only." style="width: 70%; max-width: 200px; border-radius: 8px; display: block; margin: 0 auto;" />
+          <div style="font-size: 12px; color: var(--mute); margin-top: 12px;"><strong style="color:var(--ink);">Collapse</strong> — L1 Chat, keyboard up. Space contention.</div>
+        </div>
+        <div style="flex: 1 1 0; min-width: 0; background: var(--purple-tint); border-radius: 12px; padding: 18px 16px; text-align: center;">
+          <img src="screenshots/catchup-l1.png" alt="L1 Catchup, dock Minimized as a slim pill at the top." style="width: 70%; max-width: 200px; border-radius: 8px; display: block; margin: 0 auto;" />
+          <div style="font-size: 12px; color: var(--mute); margin-top: 12px;"><strong style="color:var(--ink);">Minimize</strong> — L1 Catchup. Attention contention.</div>
+        </div>
+      </div>
+    </figure>
+    <div class="test"><strong>Violated if:</strong> a keyboard triggers Minimize (it shouldn't — keyboards are transient → Collapse), or a compose drawer triggers Collapse (it should Minimize — the drawer IS the surface).</div>
+  </div>
+</details>
+
+<details class="principle">
+  <summary><span class="id">O3</span> Video on and keyboard up cannot both be active.
+    <button class="copybtn" data-copy="O3. Video on and keyboard up cannot both be active. Turning video on expands the dock and dismisses the keyboard. Opening the keyboard collapses the expanded dock. The user is either typing or on camera — never both.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> Turning video on (<code>meeting.isVideoOn = true</code>) expands the dock and dismisses the keyboard. Opening the keyboard collapses the expanded dock. The user is either typing or on camera — never both at the same time.</p>
+    <p><strong>Example.</strong> User is composing a message in L1 Chat (keyboard up, dock Collapsed). They turn video on. The keyboard dismisses, the dock expands, the half-typed message is preserved in the input. They can return to typing by tapping the input — and the dock collapses again.</p>
+    <div class="test"><strong>Violated if:</strong> a mockup shows the keyboard up AND the Expanded dock (with tiles) visible at the same time on the same surface.</div>
+  </div>
+</details>
+
+<details class="principle">
+  <summary><span class="id">O4</span> Scrolling down on any scrollable surface collapses the dock.
+    <button class="copybtn" data-copy="O4. Scrolling down on any scrollable surface collapses the dock. When the user scrolls down on a surface where the dock is Expanded, it auto-collapses. Scrolling back to the top restores Expanded. Applies uniformly to every scrollable L0 tab and every L1 chat/feed/grid.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> When the user scrolls down on a surface where the dock is Expanded, the dock auto-collapses. Scrolling back to the top restores Expanded. This applies uniformly to every L0 tab that scrolls (Activity, Chat list, Calendar, Calls, More) and every L1 chat / feed / grid. Surfaces that don't scroll never trigger this behavior — there's nothing to trigger on.</p>
+    <p><strong>Example.</strong> User is in a meeting and opens L0 Activity. Dock is Expanded. They scroll down to read older notifications — dock Collapses. They scroll back to the top — dock Expands again.</p>
+    <div class="test"><strong>Violated if:</strong> a scrollable surface keeps the dock Expanded while the user is actively scrolling down through items, OR the dock collapses on a surface that didn't actually scroll (e.g., a tap that doesn't translate to scroll movement).</div>
+  </div>
+</details>
+
+<details class="principle">
+  <summary><span class="id">O5</span> One tap returns the user to the meeting, in the exact state they left it.
+    <button class="copybtn" data-copy="O5. One tap returns the user to the meeting, in the exact state they left it. Tap the dock from any state → meeting stage restores with the same mic, video, and content-sharing state. No confirm dialog, no intermediate sheet.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> Tapping the dock from any state returns the user to the meeting stage in <em>exactly</em> the state they left it: same mic, same video, same content-sharing view. The round-trip is one tap. No confirm dialog, no intermediate sheet, no re-join flow.</p>
+    <p><strong>Example.</strong> User leaves the meeting stage while sharing a slide. They navigate to Chat, then Catchup. They tap the Minimized dock to return — the slide is still shared, their mic and camera are exactly as they were. (Implementation: state is preserved in <code>ActiveMeetingContext</code>.)</p>
+    <div class="test"><strong>Violated if:</strong> the return takes more than one tap, OR the meeting state changes during the round-trip (mic resets, video flips off, content sharing drops, the stage view re-initializes).</div>
+  </div>
+</details>
+
+<details class="principle">
+  <summary><span class="id">O6</span> The dock outranks banner nudges on the same surface.
+    <button class="copybtn" data-copy="O6. The dock outranks banner nudges on the same surface. When the dock is present, banner-style nudges on the same surface are subdued or hidden so the page's working area stays usable.">Copy</button>
+  </summary>
+  <div class="body">
+    <p><strong>Rule.</strong> When the dock is present on a surface, banner-style nudges on the same surface — recurring-meeting reminders, missed-call prompts, schedule banners, sticky promotional bars — are subdued or hidden. The dock has higher claim on the surface's vertical space than these transient banners, and the page's working area below the dock must remain usable.</p>
+    <figure style="margin: 14px 0 6px; padding: 0;">
+      <div style="background: var(--purple-tint); border-radius: 12px; padding: 20px;">
+        <img src="screenshots/o6-banner-nudge.png" alt="Side-by-side: left phone shows L1 channel chat without dock and a full recurring-meeting banner; right phone shows the same chat with the dock Collapsed at the top and the recurring-meeting banner suppressed." style="width: 100%; border-radius: 8px; display: block;" />
+      </div>
+      <figcaption style="font-size: 12px; color: var(--mute); margin-top: 8px;">Left: no dock, full recurring-meeting banner present. Right: dock Collapsed at top, banner suppressed so the working area below stays usable.</figcaption>
+    </figure>
+  </div>
+</details>
+
+<h2 id="rubric"><span class="tag">07</span> Decision rubric — which variant for a new surface?</h2>
+<p>Answer the questions in order, top to bottom. The <strong>first "yes" wins</strong>; stop and use that verdict. The result updates live below.</p>
+
+<div class="rubric">
+
+  <div class="qcard" data-q="1">
+    <div class="qhead">
+      <span class="qnum">Q1</span>
+      <h3 class="qtitle">Is the surface itself a drawer or bottom sheet?</h3>
+    </div>
+    <p class="qhint">"The drawer IS the page you've landed on." Not "a drawer happens to appear on top." A keyboard popping up does NOT count — that's a transient overlay, handled by Q3.</p>
+    <div class="qex">
+      <div><span class="ex-tag yes">Yes</span>L2 "New post" in unthreaded channel — the New Post drawer is the entire page.</div>
+      <div><span class="ex-tag no">No</span>L1 1:1 Chat with the keyboard up — the keyboard is just a transient input on top of the chat.</div>
+    </div>
+    <div class="qbuttons">
+      <button type="button" class="qbtn yes" data-q="1" data-value="yes" data-priority="1" data-answer="minimized" data-reason="The drawer or sheet IS the surface itself. Q1 is about the surface's own layout, not about transient overlays like keyboards." data-principle="V3 · O1 · O2" aria-pressed="false">Yes</button>
+      <button type="button" class="qbtn no" data-q="1" data-value="no" aria-pressed="false">No / not sure</button>
+    </div>
+  </div>
+
+  <div class="qcard" data-q="2">
+    <div class="qhead">
+      <span class="qnum">Q2</span>
+      <h3 class="qtitle">Is the surface designed for focused, one-thing-at-a-time use, where any motion elsewhere on screen would distract from the task?</h3>
+    </div>
+    <p class="qhint">Concretely: the surface presents a single item, decision, or card, and asks the user to read / decide / swipe before moving on.</p>
+    <div class="qex">
+      <div><span class="ex-tag yes">Yes</span>Catchup L1 (swipe-through cards), any future single-task triage flow.</div>
+      <div><span class="ex-tag no">No</span>A scrollable list, even a long one — that's Q3.</div>
+    </div>
+    <div class="qbuttons">
+      <button type="button" class="qbtn yes" data-q="2" data-value="yes" data-priority="2" data-answer="minimized" data-reason="The surface is built for focused, one-thing-at-a-time use. Even minor motion at the top would break the user's task." data-principle="V2 · O2" aria-pressed="false">Yes</button>
+      <button type="button" class="qbtn no" data-q="2" data-value="no" aria-pressed="false">No / not sure</button>
+    </div>
+  </div>
+
+  <div class="qcard" data-q="3">
+    <div class="qhead">
+      <span class="qnum">Q3</span>
+      <h3 class="qtitle">Does the surface use a keyboard for typing, OR scroll vertically at all?</h3>
+    </div>
+    <p class="qhint">Either trigger qualifies. Any surface that scrolls down is a candidate — long lists, grids, feeds, or short lists that can scroll a bit. If the surface fits on one screen and never scrolls, the answer is No.</p>
+    <div class="qex">
+      <div><span class="ex-tag yes">Yes</span>L0 Activity, L0 Chat list, L0 Calendar, L0 Calls, L0 More, L1 1:1 Chat, L1 Threaded channel, L1 Unthreaded channel.</div>
+      <div><span class="ex-tag no">No</span>A surface that fits in one screen with no input.</div>
+    </div>
+    <div class="qbuttons">
+      <button type="button" class="qbtn yes" data-q="3" data-value="yes" data-priority="3" data-answer="expanded-with-collapse" data-reason="The surface uses a keyboard or has a list the user scrolls through. The dock starts Expanded and Collapses (to header-only) when the keyboard appears or the user scrolls down." data-principle="V2 · O2 · O3 · O4" aria-pressed="false">Yes</button>
+      <button type="button" class="qbtn no" data-q="3" data-value="no" aria-pressed="false">No / not sure</button>
+    </div>
+  </div>
+
+  <div class="qcard" data-q="4">
+    <div class="qhead">
+      <span class="qnum">Q4</span>
+      <h3 class="qtitle">Everything else?</h3>
+    </div>
+    <p class="qhint">Anything that doesn't fit Q1–Q3 — a single-screen surface with no scroll, no keyboard, no immersion, no drawer. Dock stays Expanded; user can drag it down to Collapse manually.</p>
+    <div class="qex">
+      <div><span class="ex-tag yes">Yes</span>a single-screen "Meeting ended" summary, a compact confirmation page that fits on one screen, a profile detail card with no scroll.</div>
+    </div>
+    <div class="qbuttons">
+      <button type="button" class="qbtn yes" data-q="4" data-value="yes" data-priority="4" data-answer="expanded" data-reason="No drawer, no immersion, no keyboard, no long scroll. Default to Expanded; the user can manually collapse if they want." data-principle="V1 · O1" aria-pressed="false">Yes</button>
+      <button type="button" class="qbtn no" data-q="4" data-value="no" aria-pressed="false">No / not sure</button>
+    </div>
+  </div>
+
+  <div class="verdict empty" id="verdict">
+    <h4>Verdict</h4>
+    <div class="answer">Answer the questions above to see a recommendation.</div>
+  </div>
+
+</div>
+
+</div><!-- /.wrap -->
+
+</div><!-- /.layout -->
+
+<script>
+  // Copy-to-clipboard
+  document.querySelectorAll('.copybtn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const text = btn.dataset.copy;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('ok');
+        setTimeout(() => { btn.textContent = original; btn.classList.remove('ok'); }, 1400);
+      });
+    });
+  });
+
+  // Prevent the copy button from toggling the <details>
+  document.querySelectorAll('details.principle summary').forEach(summary => {
+    summary.addEventListener('click', (e) => {
+      if (e.target.classList.contains('copybtn')) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  // Decision rubric — state-driven, no radios, no event-timing races.
+  const verdict = document.getElementById('verdict');
+  const labels = {
+    'minimized': 'Minimized — slim timer pill at the top',
+    'expanded-with-collapse': 'Expanded by default — Collapses (to header-only) when keyboard appears or user scrolls down',
+    'expanded': 'Expanded — only collapses when the user drags it down manually'
+  };
+
+  const answers = { q1: null, q2: null, q3: null, q4: null };  // null | 'yes' | 'no'
+
+  function render() {
+    // Find first Yes (lowest-numbered question with 'yes')
+    let firstYes = null;
+    for (let i = 1; i <= 4; i++) {
+      if (answers['q' + i] === 'yes') { firstYes = i; break; }
+    }
+    // Cascade: questions after the first Yes are forcibly cleared
+    for (let i = 1; i <= 4; i++) {
+      if (firstYes !== null && i > firstYes) answers['q' + i] = null;
+    }
+    // Paint each card from state
+    for (let i = 1; i <= 4; i++) {
+      const card = document.querySelector('.qcard[data-q="' + i + '"]');
+      if (!card) continue;
+      const value = answers['q' + i];
+      const isDisabled = firstYes !== null && i > firstYes;
+      card.classList.toggle('disabled', isDisabled);
+      card.classList.toggle('has-yes', value === 'yes');
+      card.querySelectorAll('.qbtn').forEach(btn => {
+        const selected = btn.dataset.value === value;
+        btn.classList.toggle('selected', selected);
+        btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
+    }
+    // Verdict
+    if (firstYes === null) {
+      verdict.classList.add('empty');
+      verdict.innerHTML = '<h4>Verdict</h4><div class="answer">Answer the questions above to see a recommendation.</div>';
+      return;
+    }
+    const winner = document.querySelector('.qcard[data-q="' + firstYes + '"] .qbtn.yes');
+    verdict.classList.remove('empty');
+    verdict.innerHTML =
+      '<h4>Verdict</h4>' +
+      '<div class="answer">' + labels[winner.dataset.answer] + '</div>' +
+      '<div class="reason"><strong>Why:</strong> ' + winner.dataset.reason + '</div>' +
+      '<div class="reason" style="margin-top:6px;"><strong>Backed by:</strong> ' + winner.dataset.principle + '</div>';
+  }
+
+  document.querySelectorAll('.rubric .qbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = 'q' + btn.dataset.q;
+      const v = btn.dataset.value;
+      answers[q] = (answers[q] === v) ? null : v;  // toggle off on re-click
+      render();
+    });
+  });
+
+  // Initial paint
+  render();
+
+  // Open every collapsible before printing so the PDF contains full content
+  const openAllDetails = () => {
+    document.querySelectorAll('details').forEach(d => d.setAttribute('open', ''));
+  };
+  window.addEventListener('beforeprint', openAllDetails);
+  if (window.matchMedia && window.matchMedia('print').matches) openAllDetails();
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 83 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Mask group">
+<mask id="mask0_0_373" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="83" height="32">
+<path id="Rectangle 346605424" d="M0 16C0 7.16344 7.16344 0 16 0H67C75.8366 0 83 7.16344 83 16V16C83 24.8366 75.8366 32 67 32H16C7.16344 32 0 24.8366 0 16V16Z" fill="var(--fill-0, white)"/>
+</mask>
+<g mask="url(#mask0_0_373)">
+<g id="Ellipse 26265127" filter="url(#filter0_f_0_373)">
+<circle cx="108" cy="86" r="103" fill="url(#paint0_radial_0_373)"/>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_0_373" x="-59" y="-81" width="334" height="334" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="32" result="effect1_foregroundBlur_0_373"/>
+</filter>
+<radialGradient id="paint0_radial_0_373" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(191 -7.49995) rotate(133.43) scale(245.105 199.002)">
+<stop offset="0.055" stop-color="#FFBC5F"/>
+<stop offset="0.563973" stop-color="#FE7979"/>
+<stop offset="0.95" stop-color="#7E80FF"/>
+</radialGradient>
+</defs>
+</svg>

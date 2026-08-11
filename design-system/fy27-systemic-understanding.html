@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FY27 Multitasking — Systemic Understanding</title>
+<style>
+  :root{
+    --accent:#5b5fc7; --accent-soft:#eceefb; --ink:#1b1b1f; --ink2:#46464f;
+    --ink3:#6e6e78; --line:#e4e4ea; --bg:#fafafb; --card:#fff;
+    --ok:#0f7a0b; --okbg:#e7f4e7; --warn:#9a6700; --warnbg:#fbf1d8;
+    --risk:#b3261e; --riskbg:#fbe7e6; --gap:#7a4ad9; --gapbg:#f0e9fb;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#f1f1f5;padding:1px 5px;border-radius:5px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 120px}
+  header.hero{background:linear-gradient(135deg,#5b5fc7,#7f85f5);color:#fff;padding:38px 0 30px;margin-bottom:8px}
+  header.hero .wrap{padding-bottom:0}
+  header.hero h1{margin:0 0 6px;font-size:27px;letter-spacing:-.4px}
+  header.hero p{margin:0;opacity:.92;max-width:760px}
+  nav.tabs{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav.tabs .wrap{display:flex;gap:4px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+  nav.tabs a{padding:6px 12px;border-radius:999px;color:var(--ink2);font-weight:600;font-size:13px}
+  nav.tabs a:hover{background:var(--accent-soft);text-decoration:none}
+  section{margin:34px 0;scroll-margin-top:58px}
+  h2{font-size:20px;margin:0 0 4px;display:flex;align-items:center;gap:9px}
+  h2 .n{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:7px;background:var(--accent);color:#fff;font-size:13px}
+  .lede{color:var(--ink2);margin:2px 0 16px;max-width:820px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+  details.card>summary{cursor:pointer;font-weight:650;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  details.card>summary::-webkit-details-marker{display:none}
+  details.card>summary::after{content:"▸";color:var(--ink3);transition:transform .15s}
+  details.card[open]>summary::after{transform:rotate(90deg)}
+  details.card>summary small{color:var(--ink3);font-weight:500}
+  .grid{display:grid;gap:10px}
+  @media(min-width:680px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr 1fr 1fr}}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink3);font-weight:650;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+  tbody tr:hover{background:#fafaff}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:650;white-space:nowrap}
+  .p-ok{background:var(--okbg);color:var(--ok)} .p-warn{background:var(--warnbg);color:var(--warn)}
+  .p-risk{background:var(--riskbg);color:var(--risk)} .p-gap{background:var(--gapbg);color:var(--gap)}
+  .p-keep{background:var(--accent-soft);color:var(--accent)}
+  .muted{color:var(--ink3)}
+  .kv{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;font-size:13px}
+  .kv dt{color:var(--ink3);font-weight:600}.kv dd{margin:0}
+  .filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 14px}
+  .filters button{border:1px solid var(--line);background:#fff;color:var(--ink2);padding:5px 11px;border-radius:999px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .filters button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .filters .sep{width:1px;height:18px;background:var(--line);margin:0 4px}
+  .ec{border:1px solid var(--line);border-left-width:4px;border-radius:10px;background:#fff;padding:12px 14px;margin:9px 0}
+  .ec.s-preserve{border-left-color:var(--accent)} .ec.s-risk{border-left-color:var(--risk)} .ec.s-gap{border-left-color:var(--gap)}
+  .ec h4{margin:0 0 4px;font-size:14.5px;display:flex;gap:8px;align-items:center}
+  .ec .where{font-size:12.5px;color:var(--ink2);margin:5px 0}
+  .ec .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:7px}
+  .ec label.done{margin-left:auto;font-size:12px;color:var(--ink3);display:flex;align-items:center;gap:5px;cursor:pointer}
+  .ec.checked{opacity:.55}
+  .tag{font-size:11px;color:var(--ink3);background:#f3f3f7;border-radius:6px;padding:1px 7px}
+  .legend{font-size:12px;color:var(--ink3);margin:4px 0 0}
+  .count{font-size:12px;color:var(--ink3);margin-left:6px}
+  .note{background:var(--accent-soft);border:1px solid #d9dbf6;border-radius:10px;padding:11px 14px;font-size:13.5px;margin:12px 0}
+  .arrow{color:var(--accent);font-weight:700}
+  ul.tight{margin:6px 0;padding-left:18px}ul.tight li{margin:3px 0}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <h1>FY27 Multitasking — Systemic Understanding</h1>
+  <p>How today's meeting experience is built, how it themes, and how the FY27 redesign evolves from it — with the edge cases the current screens handle that the redesign must consciously keep or drop. Source of truth for building versioned components.</p>
+</div></header>
+
+<nav class="tabs"><div class="wrap">
+  <a href="#system">1 · Current system</a>
+  <a href="#theme">2 · Theme model</a>
+  <a href="#libs">3 · Libraries</a>
+  <a href="#evolution">4 · Evolution</a>
+  <a href="#edges">5 · Edge cases to flag</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ============ 1 · CURRENT SYSTEM ============ -->
+<section id="system">
+  <h2><span class="n">1</span> Current meeting system</h2>
+  <p class="lede">The running app (the <code>current</code> baseline version). Built around <code>MeetingPage.tsx</code> which orchestrates a 3-view swipeable stage, a draggable multitasking panel, and a corner self-tile. State that must survive backgrounding lives in <code>ActiveMeetingContext</code>, not in <code>MeetingPage</code>.</p>
+
+  <details class="card" open><summary>Component inventory <small>role · key variants/states</small></summary>
+    <table>
+      <thead><tr><th>Component</th><th>Role</th><th>Variants / states</th></tr></thead>
+      <tbody>
+        <tr><td><b>MeetingHeader</b> → Header</td><td>Top bar</td><td>visible / hidden (auto-hide 8s) / <code>alwaysVisible</code>; recording badge; participant count; back + end-call</td></tr>
+        <tr><td><b>SwipeableViews</b></td><td>3-view stage carousel</td><td>view 0 On-the-go · 1 Gallery · 2 Focus; page dots</td></tr>
+        <tr><td><b>MeetingStage</b></td><td>Gallery</td><td>2×2 grid · split (65/35) · content-sharing featured · fullscreen entry</td></tr>
+        <tr><td><b>OnTheGoMode</b></td><td>View 0</td><td>centered self-tile · mic · hand-raise · speaker-device picker; auto-mutes on entry</td></tr>
+        <tr><td><b>FocusMode</b></td><td>View 2</td><td>single active speaker (8s rotation) + secondary row · content-sharing · fullscreen</td></tr>
+        <tr><td><b>SelfVideoTile</b></td><td>Corner PiP</td><td>video on/off (initials "UV") · mic on/off pill · hand-raise gold ring · emoji (3s) · default 121×136 / split 67×90</td></tr>
+        <tr><td><b>VideoTile</b></td><td>Remote participant</td><td>video/image · active-speaker 4px <code>#7f85f5</code> border · name tag · incoming-audio pulse</td></tr>
+        <tr><td><b>MultitaskingPanel</b></td><td>Universal panel shell</td><td>65vh default ↔ immersive fill · main vs nested (back-chevron) · drag height</td></tr>
+        <tr><td><b>ChatPanel / CopilotPanel</b></td><td>L1 panels</td><td>message thread · reactions · NativeInputBar (keyboard-aware); Copilot: thinking, follow-ups, media, typewriter</td></tr>
+        <tr><td><b>MorePanel</b></td><td>L1 hub</td><td>nested views: main · participants · meetingInfo · meetingSettings · share; reactions + hand-raise + record</td></tr>
+        <tr><td><b>ParticipantsPanel</b></td><td>Roster + L2</td><td>In-meeting · Raised-hands · Lobby sections; presence (busy/away/dnd/available); per-row Options L2</td></tr>
+        <tr><td><b>AgendaTimerPanel</b> + AgendaEditView</td><td>Segmented timer + edit</td><td>topic segments (running/paused/in-progress); edit rules: completed immutable, in-progress duration-only, not-started full</td></tr>
+        <tr><td><b>NotificationsPanel</b> + NotificationUFD</td><td>Hub + floating pill</td><td>per-icon-type sections; UFD critical/informational, swipe-dismiss; badge dedup + reset-on-open</td></tr>
+        <tr><td><b>AdditionalInfoLayer</b></td><td>Top status pills</td><td>raised-hands · segmented timer · notification bell+badge; portrait / landscape rows</td></tr>
+        <tr><td><b>Immersive*</b> (Bar, SplitContext, PanelResizeHandle)</td><td>Drag-to-maximize</td><td>two detents (65vh ↔ 100dvh−117); ImmersiveBar (48px, red end-call) replaces header/AIL</td></tr>
+        <tr><td><b>FullscreenContentView</b></td><td>Landscape content</td><td>full-bleed shared content · top AIL row · small self-tile · exit</td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details class="card"><summary>Use-case matrix <small>which components on screen, in what state</small></summary>
+    <table>
+      <thead><tr><th>Mode</th><th>Header</th><th>Stage</th><th>Panel</th><th>Self-tile</th></tr></thead>
+      <tbody>
+        <tr><td>Gallery (default)</td><td>auto-hide</td><td>2×2 grid</td><td>—</td><td>corner 121×136</td></tr>
+        <tr><td>On-the-go (v0)</td><td>alwaysVisible</td><td>centered self + picker</td><td>—</td><td>centered, mic/video off</td></tr>
+        <tr><td>Focus (v2)</td><td>auto-hide</td><td>speaker + secondary, 8s cycle</td><td>—</td><td>corner</td></tr>
+        <tr><td>Split</td><td>auto-hide</td><td>65% main + 35% secondary</td><td>—</td><td>corner; drag→immersive</td></tr>
+        <tr><td>Immersive</td><td><i>replaced by ImmersiveBar</i></td><td>collapsed</td><td>fill (100dvh−117)</td><td>67×90</td></tr>
+        <tr><td>Chat / Copilot / More / Agenda / Notifications / Hands</td><td>visible</td><td>behind panel</td><td>the L1 panel</td><td>corner</td></tr>
+        <tr><td>Content sharing</td><td>visible</td><td>shared content featured</td><td>—</td><td>corner; fullscreen entry</td></tr>
+        <tr><td>Fullscreen content</td><td><i>not rendered</i></td><td>full-bleed (landscape)</td><td>—</td><td>67×90 bottom-right</td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details class="card"><summary>Persistence — <code>ActiveMeetingContext</code> <small>survives MeetingPage unmount/remount</small></summary>
+    <p class="muted" style="margin-top:8px">Backgrounding unmounts <code>MeetingPage</code>; the provider in <code>RootLayout</code> keeps state alive. Never put persist-worthy state in <code>MeetingPage</code> local state.</p>
+    <div class="kv">
+      <dt>Device</dt><dd>isMicOn, isVideoOn, isContentSharing</dd>
+      <dt>Meeting</dt><dd>isActive, isBackgrounded, meetingTitle, isRecording, lobbyCount</dd>
+      <dt>Notifications</dt><dd>notificationCount, <code>seenNotificationTypesRef</code> (dedup; cleared on endMeeting)</dd>
+      <dt>Agenda</dt><dd>agendaItems[], agendaTopicIndex, agendaPaused, <b>agendaTimerEpoch</b> (epoch-based → accurate remaining on return), agendaPausedRemaining</dd>
+      <dt>Chat</dt><dd>chatMessages[] — <b>shared with the DM "Marketing Team Sync" row</b> via the same context</dd>
+    </div>
+  </details>
+  <p class="muted" style="font-size:12.5px">Deep prop/variant detail lives in the code; this is the navigable map. Given a component name, its full variant surface is reproducible from <code>src/app/components/</code>.</p>
+</section>
+
+<!-- ============ 2 · THEME MODEL ============ -->
+<section id="theme">
+  <h2><span class="n">2</span> Theme-awareness model</h2>
+  <p class="lede">Light/Dark is wired (ThemeProvider toggles <code>.dark</code> on <code>&lt;html&gt;</code>; persisted; system-default). But ~284 hardcoded colors across ~40 files mean dark mode is correct <b>only on migrated/redesigned surfaces</b>. New components consume <code>--fy27-*</code> tokens; legacy components get migrated as they're redesigned.</p>
+
+  <div class="grid two">
+    <div class="card"><b>Three color patterns in the code</b>
+      <ul class="tight">
+        <li><span class="pill p-ok">A · token</span> semantic CSS vars / <code>fy27-*</code> utilities — theme-aware (≈5%, mostly <code>ui/</code>)</li>
+        <li><span class="pill p-risk">B · hardcoded</span> hex/rgba — not theme-aware (≈85%)</li>
+        <li><span class="pill p-warn">C · local</span> per-component THEMES object (≈10%, e.g. NativeInputBar)</li>
+      </ul>
+    </div>
+    <div class="card"><b>The target</b>
+      <p style="margin:6px 0 0">Everything new → pattern A using <a href="teams-mobile/fy27-tokens.md">fy27-tokens</a>. A component built on these tokens is correct in both modes with zero extra work. Migrate B/C in place when a surface is redesigned.</p>
+    </div>
+  </div>
+
+  <details class="card"><summary>Worst hardcoded hotspots <small>migrate first</small></summary>
+    <table>
+      <thead><tr><th>File:line</th><th>Value</th><th>→ token</th></tr></thead>
+      <tbody>
+        <tr><td>AppBottomNav:4–5</td><td><code>ACCENT #5C4FE3</code> / <code>INACTIVE #242424</code></td><td>brand / icon-primary</td></tr>
+        <tr><td>Header:80,110</td><td><code>#CC4A31</code> rec · <code>#ff000d</code> end-call</td><td>status-recording* / text-danger</td></tr>
+        <tr><td>AppShell:31–39</td><td><code>#e5e5e5</code> / <code>white</code></td><td>surface-subtlest / surface-dominant</td></tr>
+        <tr><td>MultitaskingPanel:43</td><td><code>rgba(24,24,24,.98)</code> (dark-only)</td><td>surface-dominant + opacity (needs light)</td></tr>
+        <tr><td>MeetingDock:77,338</td><td><code>CTRL #242424</code> / title</td><td>icon-primary / text-dominant</td></tr>
+        <tr><td>NativeInputBar:154</td><td><code>#584bdf</code> dark send <b>(bug)</b></td><td>brand <code>#7F85F5</code></td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <div class="note"><b>Token gaps to add</b> (during migration, not yet in <code>theme.css</code>): <code>--fy27-status-recording</code> (the maroon rec dot — not a presence color), a <code>--fy27-glass-*</code> for the translucent nav/panel surfaces, and Activity badge tokens (mention <code>#cc4a31</code> / post <code>#7868eb</code> / reaction <code>#ffeaee</code>). Add to both <code>:root</code> + <code>.dark</code> with verified contrast, then record in <code>fy27-tokens.md</code>.</div>
+</section>
+
+<!-- ============ 3 · LIBRARIES ============ -->
+<section id="libs">
+  <h2><span class="n">3</span> Library references</h2>
+  <p class="lede">Scaffolded to the real Figma libraries. <b>Index + just-in-time fetch</b> — pull the specific icon/avatar/component when building, don't mirror whole libraries. Full recipes in <a href="README.md">design-system/README.md</a>.</p>
+  <div class="grid two">
+    <div class="card"><b>Tokens</b> · <a href="teams-mobile/fy27-tokens.md">fy27-tokens.md</a> · <a href="teams-mobile/foundations.md">foundations.md</a><p class="muted" style="margin:6px 0 0">Teams 2 Mobile Variables (<code>ywXpf7pgnAd8u6qfot0ZaU</code>). <code>get_variable_defs</code> needs a desktop selection — read values from the catalogs.</p></div>
+    <div class="card"><b>Icons</b> · <a href="teams-mobile/icons.md">icons.md</a><p class="muted" style="margin:6px 0 0">Fluent iconography, Title-Case sets, <b>Size 16–32 × Regular/Filled</b>. ⚠️ node <code>342916-3401</code> is the Teams logo — resolve glyphs via <code>search_design_system</code>. Wrap as TS <code>size</code>/<code>color</code> components (never inline mic/video).</p></div>
+    <div class="card"><b>Avatars</b> · <a href="teams-mobile/avatars.md">avatars.md</a><p class="muted" style="margin:6px 0 0">Fluent avatars (<code>KGP1cSTKB0NsKZeLhkdlJBXv</code>). 15 CELA faces in <code>assets/figma/dm/avatars/</code>. Sizes 56/40/tile; presence is a separate ring (<code>--fy27-presence-*</code>).</p></div>
+    <div class="card"><b>Teams iOS components</b> · <a href="teams-mobile/ios-components-variants.md">ios-components-variants.md</a><p class="muted" style="margin:6px 0 0">Nav bar, list, button, badge, avatar, segmented, divider, sheet, toolbar, chiclet — as variant <i>models</i>. Theme is never a variant (CSS modes); pressed/disabled are discrete state nodes.</p></div>
+  </div>
+</section>
+
+<!-- ============ 4 · EVOLUTION ============ -->
+<section id="evolution">
+  <h2><span class="n">4</span> Evolution: current <span class="arrow">→</span> FY27</h2>
+  <p class="lede">The redesign <b>keeps the IA, behavior, and state model</b> and <b>reinvents the visual language</b>. The Mobile Meetings POR is the baseline: complete and state-rich, but visually conservative (flat monochrome glyphs, maroon end-call, grey utilitarian surfaces, dark pill name-chips, tile-arithmetic grids, text-heavy UFDs).</p>
+  <div class="grid two">
+    <div class="card"><b>Keep (don't touch)</b><ul class="tight">
+      <li>Information architecture &amp; panel navigation</li>
+      <li><code>ActiveMeetingContext</code> persistence model</li>
+      <li>Notification dedup/badge, recording, mic/agenda behavior</li>
+      <li>Multitasking dock + PiP carry-over</li>
+      <li>The full state coverage catalogued in §5</li>
+    </ul></div>
+    <div class="card"><b>Reinvent</b><ul class="tight">
+      <li>Type ramp, palette, surface/elevation, density</li>
+      <li>Iconography choices, motion grammar</li>
+      <li>Light + Dark as a first-class axis (tokens)</li>
+      <li>Glanceable surfaces over dense text cards</li>
+    </ul></div>
+  </div>
+  <div class="card"><b>Mechanism — live versioned swap.</b> <code>current</code> = today's components (baseline + default). Each MVP branch registers redesigned components under a version id; the resolver routes by active version (nearest-defined up the <code>basedOn</code> chain), so a version only declares what it changed. First example: <code>MeetingHeader</code> <span class="arrow">→</span> <code>HeaderV1</code> registered at <code>mvp1</code>. Switch live from the profile drawer. A slot can register <code>Hidden</code> to <i>remove</i> a component in a version.</div>
+</section>
+
+<!-- ============ 5 · EDGE CASES ============ -->
+<section id="edges">
+  <h2><span class="n">5</span> Edge cases the current screens handle</h2>
+  <p class="lede">The checklist to <b>flag against</b> when scoping each MVP. Each is something today's design supports; the redesign must consciously <b>preserve</b> it, accept it's <b>at-risk</b> under a new layout, or note it's a <b>gap</b> already (absent in the baseline too). Filter, then tick what a version has addressed (saved locally).</p>
+
+  <div class="filters" id="ecFilters">
+    <button data-f="cat" data-v="all" class="active">All</button>
+    <button data-f="cat" data-v="Layout">Layout</button>
+    <button data-f="cat" data-v="Tile">Tile state</button>
+    <button data-f="cat" data-v="Orientation">Orientation</button>
+    <button data-f="cat" data-v="Notifications">Notifications</button>
+    <button data-f="cat" data-v="Presentation">Presentation</button>
+    <button data-f="cat" data-v="Lobby">Lobby</button>
+    <button data-f="cat" data-v="Persistence">Persistence</button>
+    <button data-f="cat" data-v="A11y">A11y</button>
+    <span class="sep"></span>
+    <button data-f="status" data-v="all" class="active">Any status</button>
+    <button data-f="status" data-v="preserve">Preserve</button>
+    <button data-f="status" data-v="risk">At-risk</button>
+    <button data-f="status" data-v="gap">Gap</button>
+    <span class="count" id="ecCount"></span>
+  </div>
+  <p class="legend"><span class="pill p-keep">preserve</span> exists &amp; must carry over · <span class="pill p-risk">at-risk</span> a new layout could lose it · <span class="pill p-gap">gap</span> not modeled even in the baseline (add if FY27 needs it)</p>
+
+  <div id="ecList">
+    <!-- LAYOUT -->
+    <div class="ec s-preserve" data-cat="Layout" data-status="preserve"><h4>Per-count layout ladder (1→8)</h4>
+      <div class="where">Bespoke grid per participant count — 3 is asymmetric, 5 &amp; 7 use a full-width remainder tile. Not a uniform grid. <span class="tag">POR 1140:2378…1140:1983</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Layout</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-risk" data-cat="Layout" data-status="risk"><h4>&gt;8 participants → overflow tray, self-tile dropped</h4>
+      <div class="where">Beyond 8, tiles stop multiplying; a horizontal Participant tray appears and the self-tile is sacrificed for it. The explicit "crowded call" rule. <span class="tag">POR 1140:2108 · 1145:38301</span></div>
+      <div class="meta"><span class="pill p-risk">at-risk</span><span class="tag">Layout</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-risk" data-cat="Orientation" data-status="risk"><h4>Portrait · Landscape · Forced-landscape</h4>
+      <div class="where">U-Bar, Self-tile, Participant tray and Pre-join all ship explicit landscape + forced-landscape variants. Landscape is not an afterthought. <span class="tag">POR 1124:15007 · 1124:4280</span></div>
+      <div class="meta"><span class="pill p-risk">at-risk</span><span class="tag">Orientation</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <!-- TILE -->
+    <div class="ec s-preserve" data-cat="Tile" data-status="preserve"><h4>Participant-tile display matrix</h4>
+      <div class="where">Video On · Video Off + Photo · Video Off + Initials ("AA") · Shared-content-in-tile. Same person renders at Gallery-square / Gallery-tile / small sizes. <span class="tag">POR 1030:11872</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Tile</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-preserve" data-cat="Tile" data-status="preserve"><h4>Tile state: muted · active-speaker · raised-hand</h4>
+      <div class="where">Three orthogonal states on every tile — muted mic badge, highlighted active-speaker border, explicit raised-hand badge. Code: VideoTile active border <code>#7f85f5</code>, IncomingAudio pulse. <span class="tag">POR 1030:11872 · VideoTile.tsx</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Tile</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-preserve" data-cat="Tile" data-status="preserve"><h4>Self-tile states</h4>
+      <div class="where">Video on/off (initials "UV") × raised-hand gold ring × mic pill × emoji (3s fade) × screen-share badge; default 121×136 / split 67×90. <span class="tag">POR 1124:4280 · SelfVideoTile.tsx</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Tile</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-risk" data-cat="Tile" data-status="risk"><h4>Long names truncate</h4>
+      <div class="where">Tile/tray name pill-chips and the header title truncate on overflow. A redesign with larger type or different chips must preserve graceful truncation. <span class="tag">POR meeting header · tiles</span></div>
+      <div class="meta"><span class="pill p-risk">at-risk</span><span class="tag">Tile</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="ec s-preserve" data-cat="Notifications" data-status="preserve"><h4>Notification Hub — stacked, count, clear-all</h4>
+      <div class="where">Multiple in-meeting notifications accumulate with "(N)", Clear-all, expanded/collapsed, 110-char 3-line cap. Code: badge dedup (<code>seenNotificationTypesRef</code>), reset-on-open, no-increment-while-open. <span class="tag">POR 1062:12489 · NotificationsPanel</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Notifications</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-preserve" data-cat="Notifications" data-status="preserve"><h4>Recording + secured indicators</h4>
+      <div class="where">Meeting header shows a persistent red recording dot + running timer and a shield/secure glyph as first-class indicators. <span class="tag">POR 1143:23832 · Header.tsx</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Notifications</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <!-- LOBBY -->
+    <div class="ec s-preserve" data-cat="Lobby" data-status="preserve"><h4>Lobby admit / UFD decision cards</h4>
+      <div class="where">UFD card handles "Name + N waiting" admit dialogs and modal prompts: heading + 110-char body + primary/secondary buttons. <span class="tag">POR 1085:303 · NotificationUFD</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Lobby</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-preserve" data-cat="Lobby" data-status="preserve"><h4>Pre-join / lobby camera preview</h4>
+      <div class="where">Dedicated camera-preview state with Video On/Off before joining (already iterating portrait vs forced-landscape). <span class="tag">POR 1124:15689 · PreJoinPage</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Lobby</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <!-- PRESENTATION -->
+    <div class="ec s-preserve" data-cat="Presentation" data-status="preserve"><h4>Content sharing + slideshow controls</h4>
+      <div class="where">Tile-level shared-content display + Slideshow control in 3 audiences (Audience: "1 of 20", to-presenter/take-control · Presenter: stop-presenting · Photo/whiteboard: stop-sharing). <span class="tag">POR 1097:10858 · FullscreenContentView</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Presentation</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-preserve" data-cat="Presentation" data-status="preserve"><h4>PiP multitask window (leave-meeting)</h4>
+      <div class="where">The "left the meeting view, call continues" surface: Active-speaker · Shared-content · Collapsed edge-docked nub. Core to the multitasking IA. <span class="tag">POR 1155:1606 · MeetingDock</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Presentation</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <!-- PERSISTENCE / TIMER -->
+    <div class="ec s-preserve" data-cat="Persistence" data-status="preserve"><h4>Agenda timer survives backgrounding</h4>
+      <div class="where">Epoch-based countdown → accurate remaining on return; pause/resume math; edit rules (completed immutable, in-progress duration-only, not-started full). <span class="tag">ActiveMeetingContext · AgendaTimerPanel</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Persistence</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-preserve" data-cat="Persistence" data-status="preserve"><h4>Chat shared with DM thread + dock carry-over</h4>
+      <div class="where">In-meeting chat is lifted to context and shared with the "Marketing Team Sync" DM row; dock state carries across surfaces without jitter (<code>initial=false</code>). <span class="tag">dockPersist.ts · useChatSend</span></div>
+      <div class="meta"><span class="pill p-keep">preserve</span><span class="tag">Persistence</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <!-- A11y / GAPS -->
+    <div class="ec s-gap" data-cat="A11y" data-status="gap"><h4>Network / reconnecting states</h4>
+      <div class="where">Not explicitly modeled in the POR baseline (only a NetworkIndicator stub in code). If FY27 wants poor-network / reconnecting UI, it's net-new. <span class="tag">gap in baseline</span></div>
+      <div class="meta"><span class="pill p-gap">gap</span><span class="tag">A11y</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-gap" data-cat="A11y" data-status="gap"><h4>Empty / loading skeletons</h4>
+      <div class="where">No skeleton/loading states in the baseline. Worth designing for slow joins / loading rosters. <span class="tag">gap in baseline</span></div>
+      <div class="meta"><span class="pill p-gap">gap</span><span class="tag">A11y</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-gap" data-cat="A11y" data-status="gap"><h4>Captions / live transcription</h4>
+      <div class="where">Not in the POR meeting screens. If FY27 surfaces captions/transcript, it's a new component. <span class="tag">gap in baseline</span></div>
+      <div class="meta"><span class="pill p-gap">gap</span><span class="tag">A11y</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+
+    <div class="ec s-gap" data-cat="A11y" data-status="gap"><h4>Large-text / Dynamic Type</h4>
+      <div class="where">No large-text variants modeled. Given the dense tile/pill layouts, reflow at AX sizes needs deliberate design. <span class="tag">gap in baseline</span></div>
+      <div class="meta"><span class="pill p-gap">gap</span><span class="tag">A11y</span><label class="done"><input type="checkbox"> addressed</label></div></div>
+  </div>
+</section>
+
+<p class="muted" style="font-size:12px;border-top:1px solid var(--line);padding-top:14px">Generated from a 5-stream research pass (codebase map · theme audit · POR Figma study · iOS-component variants · icon/avatar catalogs). Node ids reference the Mobile Meetings POR file <code>zTUDsyC2gVxRBk3qgyqCiE</code>. Checkbox state is saved in your browser only.</p>
+
+</div>
+
+<script>
+(function(){
+  // ---- edge-case filters ----
+  var state={cat:"all",status:"all"};
+  var list=document.getElementById("ecList");
+  var cards=Array.prototype.slice.call(list.querySelectorAll(".ec"));
+  var countEl=document.getElementById("ecCount");
+  function apply(){
+    var n=0;
+    cards.forEach(function(c){
+      var ok=(state.cat==="all"||c.dataset.cat===state.cat)&&(state.status==="all"||c.dataset.status===state.status);
+      c.style.display=ok?"":"none"; if(ok)n++;
+    });
+    countEl.textContent=n+" shown";
+  }
+  document.getElementById("ecFilters").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b)return;
+    var f=b.dataset.f;
+    document.querySelectorAll('#ecFilters button[data-f="'+f+'"]').forEach(function(x){x.classList.remove("active")});
+    b.classList.add("active"); state[f]=b.dataset.v; apply();
+  });
+  apply();
+  // ---- checkbox persistence ----
+  var KEY="fy27.edgecases.done";
+  var done={}; try{done=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+  cards.forEach(function(c,i){
+    var id=c.querySelector("h4").textContent.trim();
+    var cb=c.querySelector('input[type=checkbox]');
+    if(done[id]){cb.checked=true;c.classList.add("checked");}
+    cb.addEventListener("change",function(){
+      c.classList.toggle("checked",cb.checked);
+      done[id]=cb.checked; try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}
+    });
+  });
+})();
+</script>
+</body>
+</html>

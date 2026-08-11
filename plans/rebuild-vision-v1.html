@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rebuild Vision — Udayan's Task Organizer</title>
+<style>
+  :root{
+    --bg:#0f1115; --surface:#171a21; --surface-2:#1e222b; --line:#2a2f3a;
+    --text:#e7e9ee; --muted:#9aa3b2; --faint:#6b7280;
+    --accent:#6ea8fe; --accent-2:#a78bfa;
+    --green:#34d399; --amber:#fbbf24; --red:#f87171; --teal:#2dd4bf;
+    --radius:14px; --radius-sm:9px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px 120px}
+
+  header.hero{margin-bottom:36px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    font-weight:600;margin-bottom:10px}
+  h1{font-size:34px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px}
+  .lede{color:var(--muted);font-size:16px;max-width:70ch}
+  .meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:13px;color:var(--faint)}
+  .meta b{color:var(--text);font-weight:600}
+
+  nav.tabs{position:sticky;top:0;z-index:20;display:flex;gap:4px;flex-wrap:wrap;
+    background:rgba(15,17,21,.82);backdrop-filter:blur(10px);
+    padding:10px 0;margin:24px 0 28px;border-bottom:1px solid var(--line)}
+  .tab{padding:8px 14px;border-radius:999px;border:1px solid transparent;background:none;
+    color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.18s}
+  .tab:hover{color:var(--text);background:var(--surface)}
+  .tab.active{color:var(--text);background:var(--surface-2);border-color:var(--line)}
+
+  section{display:none;animation:fade .25s ease}
+  section.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:8px 0 4px}
+  .sub{color:var(--muted);margin-bottom:22px;max-width:72ch}
+  h3{font-size:15px;font-weight:700;margin:26px 0 10px;color:var(--text)}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;margin-bottom:14px}
+  .card.tight{padding:14px 16px}
+
+  .pain{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start}
+  .pain .n{width:26px;height:26px;border-radius:8px;background:var(--surface-2);
+    display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0}
+  .pain .body b{display:block;margin-bottom:3px}
+  .pain .body span{color:var(--muted);font-size:14px}
+  .sev{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;align-self:center}
+  .sev.high{background:rgba(248,113,113,.14);color:var(--red)}
+  .sev.med{background:rgba(251,191,36,.14);color:var(--amber)}
+  .sev.low{background:rgba(52,211,153,.14);color:var(--green)}
+
+  details.acc{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    margin-bottom:12px;overflow:hidden}
+  details.acc>summary{list-style:none;cursor:pointer;padding:16px 20px;display:flex;
+    align-items:center;gap:12px;font-weight:600}
+  details.acc>summary::-webkit-details-marker{display:none}
+  details.acc>summary .chev{margin-left:auto;color:var(--faint);transition:.2s}
+  details.acc[open]>summary .chev{transform:rotate(90deg)}
+  details.acc .inner{padding:0 20px 18px;color:var(--muted)}
+  details.acc .inner p{margin-bottom:10px}
+  .pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted)}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 4px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:700}
+  td.old{color:var(--muted)}
+  td.new{color:var(--text)}
+  td .tick{color:var(--green);font-weight:700}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+
+  code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);padding:2px 6px;border-radius:6px;color:#cdd6f4}
+  pre{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+    overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#cdd6f4;margin:10px 0}
+  pre .c{color:var(--faint)}
+  pre .k{color:var(--accent-2)}
+  pre .s{color:var(--green)}
+
+  .road{position:relative;padding-left:26px}
+  .road::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .phase{position:relative;margin-bottom:18px}
+  .phase::before{content:'';position:absolute;left:-22px;top:6px;width:12px;height:12px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 0 4px var(--bg)}
+  .phase.p2::before{background:var(--accent-2)}
+  .phase.p3::before{background:var(--teal)}
+  .phase.p4::before{background:var(--amber)}
+  .phase h4{font-size:15px;margin-bottom:2px}
+  .phase .when{font-size:12px;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  .phase ul{margin:8px 0 0 0;padding-left:18px;color:var(--muted);font-size:14px}
+  .phase li{margin-bottom:4px}
+
+  .axes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:680px){.axes{grid-template-columns:1fr}}
+  .axis{border:1px solid var(--line);border-radius:var(--radius);padding:16px;background:var(--surface)}
+  .axis .lab{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:10px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+    padding:5px 11px;border-radius:999px;border:1px solid;margin:0 6px 6px 0}
+  .c-s{color:var(--green);border-color:var(--green);background:rgba(52,211,153,.10)}
+  .c-m{color:var(--amber);border-color:var(--amber);background:rgba(251,191,36,.10)}
+  .c-l{color:var(--red);border-color:var(--red);background:rgba(248,113,113,.10)}
+  .c-cat{color:var(--accent);border-color:#34406b;background:rgba(110,168,254,.08)}
+
+  .callout{border-left:3px solid var(--accent);background:var(--surface);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin:18px 0}
+  .callout.win{border-color:var(--green)}
+  .callout b{color:var(--text)}
+  .callout p{color:var(--muted);font-size:14.5px}
+
+  .stack{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .stack .row{display:flex;gap:14px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:center}
+  .stack .row:last-child{border-bottom:none}
+  .stack .row .name{font-weight:600;min-width:160px}
+  .stack .row .why{color:var(--muted);font-size:14px}
+  .rec{font-size:11px;font-weight:700;color:var(--green);border:1px solid #2c5a44;border-radius:6px;padding:2px 7px}
+
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--faint);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Retrospective · Rebuild Vision</div>
+    <h1>If I rebuilt Udayan's Task Organizer from scratch</h1>
+    <p class="lede">We shipped a working tool through ~40 rapid iterations. That very process exposed exactly where the architecture fights back. This is an honest post-mortem and a concrete plan for a v2 that would be faster to change, harder to break, and nicer to use.</p>
+    <div class="meta">
+      <div><b>Current:</b> 1,434 lines · single HTML file</div>
+      <div><b>Migration flags:</b> 4 ad-hoc localStorage keys</div>
+      <div><b>Tag defined in:</b> 5 separate places</div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-t="diagnosis">① Diagnosis</button>
+    <button class="tab" data-t="thesis">② Core thesis</button>
+    <button class="tab" data-t="architecture">③ Architecture</button>
+    <button class="tab" data-t="model">④ Data model</button>
+    <button class="tab" data-t="ux">⑤ UX upgrades</button>
+    <button class="tab" data-t="stack">⑥ Stack</button>
+    <button class="tab" data-t="roadmap">⑦ Roadmap</button>
+  </nav>
+
+  <!-- DIAGNOSIS -->
+  <section class="active" id="diagnosis">
+    <h2>What actually hurt while building this</h2>
+    <p class="sub">Every one of these is a symptom of a root cause, not a one-off. Ranked by how much friction it caused us in this session.</p>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">1</div>
+      <div class="body"><b>"Refresh to see it" / "Nothing changed"</b><span>State lives only in <code>localStorage</code>, seeded from a hardcoded array. Any data change needed a bespoke one-time migration flag (<code>cleanup_v1</code>, <code>migrate_effort_tags</code>, <code>reorder_v2→v4</code>). Fragile and invisible to you until reload.</span></div>
+      <div class="sev high">Root cause</div>
+    </div></div>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">2</div>
+      <div class="body"><b>A tag had to be edited in 5 places</b><span>Adding/renaming one tag meant touching: the CSS classes, the <code>tagConfig</code> JS, the filter buttons HTML, the modal checkboxes, and three compare dropdowns. The effort-tag swap rippled everywhere.</span></div>
+      <div class="sev high">Root cause</div>
+    </div></div>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">3</div>
+      <div class="body"><b>The emoji-in-&lt;select&gt; fiasco</b><span>Native form controls ignore CSS on options. We burned several turns on padding/spacing that could never work. The fix was to stop using native selects for styled content.</span></div>
+      <div class="sev med">Pattern</div>
+    </div></div>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">4</div>
+      <div class="body"><b>Full <code>innerHTML</code> rebuild on every interaction</b><span>Toggling, editing, dragging — all re-render the whole list. That's why inline edit had to fight focus loss, why there's no animation, and why drag felt brittle.</span></div>
+      <div class="sev high">Root cause</div>
+    </div></div>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">5</div>
+      <div class="body"><b>The accidental duplicate ("Copilot in meetings")</b><span>Seed-array + localStorage-sync with title-based identity meant a near-match title silently created a second task. Identity should never be a display string.</span></div>
+      <div class="sev med">Pattern</div>
+    </div></div>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">6</div>
+      <div class="body"><b>Destructive delete, no undo</b><span><code>confirm()</code> is the only guard. One misclick = gone. No history, no trash, no export backup.</span></div>
+      <div class="sev med">Gap</div>
+    </div></div>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">7</div>
+      <div class="body"><b>Abandoned half-features</b><span>Open/Completed accordion was styled then dropped (dead CSS remains). Arrow-reorder added then removed. Drift accumulates in one giant file.</span></div>
+      <div class="sev low">Hygiene</div>
+    </div></div>
+
+    <div class="card tight"><div class="pain">
+      <div class="n">8</div>
+      <div class="body"><b>One flat tag namespace for two different ideas</b><span>"Small/Medium/Large effort" and "Coordination/Review/Learning" live in the same list, but they're different axes. You can nonsensically tag a task with two effort sizes at once.</span></div>
+      <div class="sev med">Modeling</div>
+    </div></div>
+  </section>
+
+  <!-- THESIS -->
+  <section id="thesis">
+    <h2>The core thesis</h2>
+    <p class="sub">If I could change only one thing, it would collapse most of the pain above.</p>
+
+    <div class="callout win">
+      <b>Single source of truth → data-driven rendering.</b>
+      <p>Define tags, columns, and views as <i>data</i>. Render the UI <i>from</i> that data reactively. The "edit in 5 places" problem, the "refresh to see it" problem, and the focus-loss problem all dissolve because there is exactly one place to change a thing and the DOM updates itself.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card"><h3 style="margin-top:0">Three principles</h3>
+        <p style="color:var(--muted);font-size:14px"><b style="color:var(--text)">1. Data over markup.</b> Tags/views are config objects. Every chip, filter, dropdown and column is generated.</p>
+        <p style="color:var(--muted);font-size:14px"><b style="color:var(--text)">2. Reactive over rebuild.</b> A 3 KB renderer diffs the DOM. No more <code>innerHTML</code> nukes.</p>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:0"><b style="color:var(--text)">3. Versioned schema over ad-hoc flags.</b> One ordered migration pipeline instead of four bespoke booleans.</p>
+      </div>
+      <div class="card"><h3 style="margin-top:0">What it buys you</h3>
+        <p style="color:var(--muted);font-size:14px">• Add a tag = one line in <code>TAGS</code>.</p>
+        <p style="color:var(--muted);font-size:14px">• Edits appear instantly, no reload, no focus loss.</p>
+        <p style="color:var(--muted);font-size:14px">• New views (Board, Matrix) are ~30 lines, not a rewrite.</p>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:0">• Data migrations are safe, ordered, and testable.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture">
+    <h2>Architecture</h2>
+    <p class="sub">Keep the "one file you can double-click" ergonomics, but structure it properly inside.</p>
+
+    <details class="acc" open><summary>Reactive state core <span class="pill">replaces innerHTML rebuilds</span><span class="chev">›</span></summary>
+      <div class="inner">
+        <p>A single observable <code>store</code>. Mutations go through actions; the view subscribes and re-renders only what changed.</p>
+        <pre><span class="c">// one place owns truth; UI is a pure function of it</span>
+<span class="k">const</span> store = createStore({
+  schemaVersion: 5,
+  tasks: [],
+  views: { dashboard:{filters:[]}, compare:{columns:[[],[],[]]} },
+  ui: { tab:'dashboard' }
+})
+store.subscribe(render)         <span class="c">// auto re-render</span>
+actions.toggleComplete(id)      <span class="c">// mutate via actions only</span></pre>
+        <p>Implementation can be ~40 lines of vanilla (proxy + subscribe), or Alpine/Preact if we accept a tiny dependency.</p>
+      </div>
+    </details>
+
+    <details class="acc"><summary>Config-driven tags &amp; views <span class="pill">replaces 5× duplication</span><span class="chev">›</span></summary>
+      <div class="inner">
+        <p>Tags, their colors, and which axis they belong to are declared once. Chips, filters, the add-task form, compare pickers, and board columns are all generated from this.</p>
+        <pre><span class="k">const</span> TAGS = {
+  effort: { exclusive:<span class="k">true</span>, options:[
+    {id:<span class="s">'s'</span>, label:<span class="s">'Small effort'</span>,  hue:150},
+    {id:<span class="s">'m'</span>, label:<span class="s">'Medium effort'</span>, hue:45},
+    {id:<span class="s">'l'</span>, label:<span class="s">'Large effort'</span>,  hue:0} ]},
+  category: { exclusive:<span class="k">false</span>, options:[
+    {id:<span class="s">'coordination'</span>, label:<span class="s">'Coordination'</span>, hue:265}, <span class="c">/* … */</span> ]}
+}
+<span class="c">// tints derived, not hand-picked:</span>
+<span class="c">// background: hsl(hue 70% 96%); text: hsl(hue 60% 40%)</span></pre>
+        <p>Colors come from a single <code>hue</code> per tag via <code>color-mix()</code>/HSL — no more hand-tuning <code>bgColor</code> and discovering two tags clash.</p>
+      </div>
+    </details>
+
+    <details class="acc"><summary>Migration pipeline <span class="pill">replaces cleanup_v1 / reorder_v4 …</span><span class="chev">›</span></summary>
+      <div class="inner">
+        <p>An ordered array of pure functions runs from the stored version up to current. Self-documenting history, runs exactly once each, trivially testable.</p>
+        <pre><span class="k">const</span> migrations = [
+  s => s,                                  <span class="c">// v0→1 base</span>
+  s => ({...s, tasks: dropTag(s,'heads-down')}),   <span class="c">// v1→2</span>
+  s => reorder(s, DICTATED_ORDER),         <span class="c">// v2→3</span>
+]
+runMigrations(store, migrations)           <span class="c">// idempotent</span></pre>
+      </div>
+    </details>
+
+    <details class="acc"><summary>View registry <span class="pill">makes new views cheap</span><span class="chev">›</span></summary>
+      <div class="inner">
+        <p>Each view (Dashboard, Compare, Board, Matrix) is a module exposing <code>render(state)</code>. Tabs are generated from the registry, so adding a view is additive, never invasive.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- DATA MODEL -->
+  <section id="model">
+    <h2>Data model: split the axes</h2>
+    <p class="sub">The single most clarifying modeling change. Effort is a single-choice property; categories are multi-choice. Treat them differently.</p>
+
+    <div class="axes">
+      <div class="axis">
+        <div class="lab">Effort · pick one (exclusive)</div>
+        <span class="chip c-s">● Small</span><span class="chip c-m">● Medium</span><span class="chip c-l">● Large</span>
+        <p style="color:var(--muted);font-size:13px;margin-top:8px">A task is exactly one size. The UI enforces it (radio behavior), so you can't tag both "Small" and "Large".</p>
+      </div>
+      <div class="axis">
+        <div class="lab">Category · pick many</div>
+        <span class="chip c-cat">Coordination</span><span class="chip c-cat">Review</span><span class="chip c-cat">Pro-active</span><span class="chip c-cat">Alignment</span><span class="chip c-cat">Learning</span>
+        <p style="color:var(--muted);font-size:13px;margin-top:8px">Free combination, as today — but now structurally separate from effort.</p>
+      </div>
+    </div>
+
+    <h3>Task shape</h3>
+    <pre>{
+  id: <span class="s">'t_8f3k'</span>,            <span class="c">// stable, NOT the title (kills dup bug)</span>
+  title: <span class="s">'Multi-tasking phase 1'</span>,
+  effort: <span class="s">'l'</span>,               <span class="c">// single axis</span>
+  categories: [<span class="s">'review'</span>],     <span class="c">// multi axis</span>
+  status: <span class="s">'open'</span>,            <span class="c">// open | done</span>
+  order: 0,
+  createdAt, completedAt, notes
+}</pre>
+
+    <div class="callout">
+      <b>Why this matters for your views.</b>
+      <p>With effort as a real dimension, a <b>Priority × Effort matrix</b> (Eisenhower-style) and an <b>effort-balanced Board</b> become natural — you can finally see "am I overloaded on Large tasks this week?" at a glance.</p>
+    </div>
+  </section>
+
+  <!-- UX -->
+  <section id="ux">
+    <h2>UX upgrades</h2>
+    <p class="sub">Same minimal aesthetic you steered us toward, but more capable and more forgiving.</p>
+
+    <table>
+      <tr><th style="width:34%">Today</th><th>v2</th></tr>
+      <tr><td class="old">Full re-render on edit; inline editor fights focus</td><td class="new"><span class="tick">→</span> Targeted updates; inline edit "just works", with optimistic UI</td></tr>
+      <tr><td class="old"><code>confirm()</code> delete, irreversible</td><td class="new"><span class="tick">→</span> Soft-delete + <b>Undo toast</b> (5s) and a Trash view</td></tr>
+      <tr><td class="old">Hand-rolled HTML5 drag, no touch support</td><td class="new"><span class="tick">→</span> <b>SortableJS</b>: smooth, touch-friendly, cross-column on Board</td></tr>
+      <tr><td class="old">Open/Completed accordion abandoned</td><td class="new"><span class="tick">→</span> Real collapsible sections, animated, state remembered</td></tr>
+      <tr><td class="old">Mouse-only</td><td class="new"><span class="tick">→</span> Keyboard: <code>j/k</code> move, <code>x</code> done, <code>e</code> edit, <code>/</code> search</td></tr>
+      <tr><td class="old">No backup; localStorage can vanish</td><td class="new"><span class="tick">→</span> One-click <b>Export / Import JSON</b>; optional auto-snapshot</td></tr>
+      <tr><td class="old">Light only</td><td class="new"><span class="tick">→</span> Light/Dark via design tokens (this very doc is the dark palette)</td></tr>
+      <tr><td class="old">No insight into the data</td><td class="new"><span class="tick">→</span> Quiet stats: count by effort, by category, weekly completion</td></tr>
+    </table>
+
+    <h3>New views worth adding</h3>
+    <div class="grid2">
+      <div class="card tight"><b>Board</b><p style="color:var(--muted);font-size:14px;margin-top:4px">Kanban by any dimension (effort, category, status). Drag between columns to re-tag. Generalizes today's Compare tab.</p></div>
+      <div class="card tight"><b>Matrix</b><p style="color:var(--muted);font-size:14px;margin-top:4px">2×2 of Priority × Effort. Drag a task to set both at once. Great for weekly planning.</p></div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section id="stack">
+    <h2>Stack &amp; tooling</h2>
+    <p class="sub">Bias toward "no build step, double-click to run" — but escape the 1,400-line single-string trap.</p>
+
+    <div class="stack">
+      <div class="row"><div class="name">Rendering <span class="rec">REC</span></div><div class="why"><b>Alpine.js</b> (15 KB, CDN) or <b>Preact + htm</b> (no build). Reactive without a toolchain. Keeps the single-file deploy.</div></div>
+      <div class="row"><div class="name">Drag &amp; drop</div><div class="why"><b>SortableJS</b> — battle-tested, touch support, cross-list. Deletes ~120 lines of fragile DnD handlers.</div></div>
+      <div class="row"><div class="name">Styling</div><div class="why"><b>CSS custom properties as design tokens</b> (color/space/radius). Aligns with the project's existing token system in <code>design-system/</code>.</div></div>
+      <div class="row"><div class="name">Persistence</div><div class="why"><b>localStorage</b> + versioned schema + JSON export. Optional <b>IndexedDB</b> if notes/attachments grow.</div></div>
+      <div class="row"><div class="name">Tests</div><div class="why">A handful of <b>vanilla unit tests</b> for the data layer: migrations, AND-filtering, reorder. The logic that bit us most.</div></div>
+      <div class="row"><div class="name">Optional build</div><div class="why">Parent repo is already <b>Vite</b>. If this graduates beyond a toy, fold it in for modules + HMR — but only when justified.</div></div>
+    </div>
+
+    <div class="callout">
+      <b>Deliberately NOT adding:</b>
+      <p>React+Redux, a router, a component library, a backend. The whole charm is a personal, offline, instant tool. Complexity must earn its place.</p>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section id="roadmap">
+    <h2>Roadmap</h2>
+    <p class="sub">Sequenced so value lands early and nothing requires a big-bang rewrite. Each phase is independently shippable.</p>
+
+    <div class="road">
+      <div class="phase p1">
+        <div class="when">Phase 1 · Foundation</div>
+        <h4>Reactive core + single source of truth</h4>
+        <ul>
+          <li>Observable store + targeted render</li>
+          <li><code>TAGS</code> config drives all chips/filters/forms</li>
+          <li>Versioned migration pipeline (retire the 4 ad-hoc flags)</li>
+          <li>CSS design tokens; light/dark</li>
+        </ul>
+      </div>
+      <div class="phase p2">
+        <div class="when">Phase 2 · Parity</div>
+        <h4>Re-create today's features on the new core</h4>
+        <ul>
+          <li>Dashboard list, AND-filters, inline edit</li>
+          <li>Compare tab (multi-tag columns)</li>
+          <li>SortableJS reorder (incl. touch)</li>
+          <li>Split effort vs category axes in the data</li>
+        </ul>
+      </div>
+      <div class="phase p3">
+        <div class="when">Phase 3 · Delight</div>
+        <h4>The stuff that makes it feel pro</h4>
+        <ul>
+          <li>Undo toast + Trash; keyboard shortcuts</li>
+          <li>Board view (Kanban by any axis)</li>
+          <li>Priority × Effort matrix</li>
+          <li>Quiet stats / insights strip</li>
+        </ul>
+      </div>
+      <div class="phase p4">
+        <div class="when">Phase 4 · Trust &amp; polish</div>
+        <h4>Won't lose your data, works for everyone</h4>
+        <ul>
+          <li>Export / Import JSON + auto-snapshots</li>
+          <li>Accessibility pass (ARIA, focus, contrast)</li>
+          <li>Unit tests on the data layer</li>
+          <li>Delete dead CSS / abandoned code paths</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout win" style="margin-top:24px">
+      <b>If you want only the highest-leverage slice:</b>
+      <p>Phase 1 alone removes ~80% of the friction we hit this session. Everything we struggled with — "edit in 5 places", "refresh to see it", focus loss, migration flags — is a Phase 1 fix.</p>
+    </div>
+  </section>
+
+  <footer>
+    Rebuild vision v1 · generated for Udayan · dark-token preview · This is a thinking artifact, not yet implemented. Say the word and I'll start Phase 1.
+  </footer>
+</div>
+
+<script>
+  const tabs=document.querySelectorAll('.tab');
+  const secs=document.querySelectorAll('section');
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.remove('active'));
+    secs.forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.t).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="24" height="24" fill="#F5F5F5"/>
+<g id="Profile">
+<rect width="1413" height="1053" transform="translate(-538 -847)" fill="white"/>
+<g id="Me-menu" clip-path="url(#clip0_1_55278)">
+<foreignObject x="-110" y="-608" width="563" height="816"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(12.5px);clip-path:url(#bgblur_1_1_55278_clip_path);height:100%;width:100%"></div></foreignObject><g id="Frame 2147224827" filter="url(#filter0_dn_1_55278)" data-figma-bg-blur-radius="25">
+<path d="M-32 -496C-32 -514.778 -16.7777 -530 2 -530H337C355.778 -530 371 -514.778 371 -496V126H-32V-496Z" fill="white" fill-opacity="0.95" style="mix-blend-mode:plus-lighter" shape-rendering="crispEdges"/>
+<g id="Frame 2147224823">
+<g id="Frame 2147224819">
+<g id="One line">
+<g clip-path="url(#clip2_1_55278)">
+<g id=".Base_One line_default">
+<g id="01. One-line / Shared / &#226;&#154;&#170;&#239;&#184;&#143; A. Base - Light">
+<rect width="371" height="60" transform="translate(-16 -18)" fill="#F8F8F8"/>
+<g id="Left">
+<g id="&#240;&#159;&#148;&#141; Icon (24x24)">
+<path id="Shape" d="M3.0022 3.74902C3.0022 3.33481 3.33798 2.99902 3.7522 2.99902H20.2563C20.8744 2.99902 21.2271 3.70467 20.8563 4.19909L16.692 9.75025L20.8563 15.3014C21.2271 15.7958 20.8744 16.5015 20.2563 16.5015L4.5022 16.501V21.2509C4.5022 21.6306 4.22004 21.9443 3.85397 21.994L3.7522 22.0009C3.3725 22.0009 3.05871 21.7187 3.00904 21.3526L3.0022 21.2509V3.74902ZM18.7561 4.49902H4.5022V15.0015H18.7561L15.1544 10.2003C14.9544 9.93362 14.9544 9.56687 15.1544 9.30018L18.7561 4.49902Z" fill="#212121"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_dn_1_55278" x="-110" y="-608" width="563" height="816" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dx="2" dy="2"/>
+<feGaussianBlur stdDeviation="40"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.609882 0 0 0 0 0.609882 0 0 0 0 0.609882 0 0 0 0.12 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_55278"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="9721" />
+<feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise" />
+<feComponentTransfer in="alphaNoise" result="coloredNoise1">
+<feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "/>
+</feComponentTransfer>
+<feComposite operator="in" in2="shape" in="coloredNoise1" result="noise1Clipped" />
+<feFlood flood-color="#000000" result="color1Flood" />
+<feComposite operator="in" in2="noise1Clipped" in="color1Flood" result="color1" />
+<feMerge result="effect2_noise_1_55278">
+<feMergeNode in="shape" />
+<feMergeNode in="color1" />
+</feMerge>
+<feBlend mode="normal" in="effect2_noise_1_55278" in2="effect1_dropShadow_1_55278" result="effect2_noise_1_55278"/>
+</filter>
+<clipPath id="bgblur_1_1_55278_clip_path" transform="translate(110 608)"><path d="M-32 -496C-32 -514.778 -16.7777 -530 2 -530H337C355.778 -530 371 -514.778 371 -496V126H-32V-496Z"/>
+</clipPath><clipPath id="clip0_1_55278">
+<rect width="402" height="874" fill="white" transform="translate(-31 -748)"/>
+</clipPath>
+<clipPath id="clip2_1_55278">
+<path d="M-16 6C-16 -7.25484 -5.25484 -18 8 -18H331C344.255 -18 355 -7.25483 355 6V42H-16V6Z" fill="white"/>
+</clipPath>
+</defs>
+</svg>

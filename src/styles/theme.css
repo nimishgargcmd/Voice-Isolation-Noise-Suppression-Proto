@@ -1,0 +1,460 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-sf-pro: -apple-system, 'SF Pro Text', 'SF Pro Display', 'SF Pro', BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sf-display: -apple-system, 'SF Pro Display', 'SF Pro', BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-size: 16px;
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #030213;
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary-foreground: #030213;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* ── FY27 redesign tokens — Teams 2 Mobile foundations (Light) ──────────
+     Semantic, purpose-driven. New redesign components consume these
+     (var(--fy27-*) or the fy27-* Tailwind utilities) — never raw hex.
+     Grow on demand: add a token here (Light + Dark) when a component needs it. */
+  --fy27-brand-primary: #5b5fc7;
+  --fy27-surface-accent-primary: #5b5fc7;        /* Surface/Accent Primary (Brand Primary — dark purple) */
+  --fy27-brand-accent-secondary: #aab1fa;        /* Brand/Accent Secondary (tint 30) */
+  --fy27-accent-tertiary: #e8ebfa;               /* Brand/Accent Tertiary (tint 50) */
+  --fy27-surface-raisedfill-alpha: rgba(235, 235, 235, 0.95); /* Surface/Raised-fill (alpha) — UFD card */
+  --fy27-surface-floating: #e5e5e5;              /* Surface/Floating — checkpoint header overlay bar (Light) */
+  --fy27-surface-dominant: #ffffff;
+  --fy27-surface-subtlest: #f1f1f1;
+  --fy27-surface-raised: #f1f1f1;
+  --fy27-surface-chat-incoming: #e8e8e8;         /* incoming chat bubble — darker than raised-fill for contrast on white */
+  --fy27-surface-border: #c8c8c8;
+  --fy27-text-dominant: #000000;
+  --fy27-text-global: #ffffff;                   /* Text/On Global (fixed white, over media/scrim) */
+  --fy27-text-primary: #212121;
+  --fy27-text-secondary: #616161;
+  --fy27-text-interactive: #5b5fc7;              /* text/interactive (Brand Primary) */
+  --fy27-text-disabled: #acacac;                 /* text/disabled (Gray v300) */
+  --fy27-text-on-accent: #ffffff;
+  --fy27-text-danger: #d92c2c;
+  --fy27-surface-danger: #f9d9d9;                /* Surface/Danger (danger badge fill) */
+  --fy27-icon-global: #ffffff;                   /* Icon/On Global (fixed white, over media/scrim) */
+  --fy27-icon-dominant: #000000;                 /* Icon/Dominant (highest-contrast on surface) */
+  --fy27-icon-primary: #212121;
+  --fy27-icon-secondary: #919191;
+  --fy27-icon-interactive: #5b5fc7;              /* Icon/Interactive (Brand Primary) */
+  --fy27-icon-success: #0f7a0b;                  /* Icon/Success (mic-on / unmuted) */
+  --fy27-icon-danger: #d92c2c;                   /* Icon/Danger (mic-off / muted) */
+  --fy27-icon-mention: #cc4a31;                  /* Icon/Mention (end-call, recording) */
+  --fy27-icon-disabled: #acacac;                 /* Icon/Disabled (inactive send) */
+  --fy27-icon-on-accent: #ffffff;                /* Icon/On Accent (glyph over brand fill) */
+  --fy27-presence-online: #6bb700;
+  --fy27-presence-away: #ffaa44;
+  --fy27-presence-dnd: #c50f1f;
+  --fy27-surface-card: #f8f8f8;
+  --fy27-surface-subtle-base: #f8f8f8;           /* Surface/Subtle Base (face.subtlebase) */
+  --fy27-surface-tertiary: #ffffff;              /* Surface/Tertiary (sheet/drawer fill) */
+  --fy27-surface-base: #f5f5f5;                  /* Surface/Base (multitasking scroll window) */
+  --fy27-fg-stroke: #d1d1d1;                     /* fg/Stroke (panel hairline) */
+  --fy27-divider: #e1e1e1;                        /* Divider/Primary */
+  --fy27-switch-off: #d1d1d6;
+  --fy27-end-call: #8d2337;
+  --fy27-recording: #cc4a31;                     /* recording dot (icon/mention) */
+  /* Meeting tile (gallery square) — Figma POR 1030:11872 */
+  --fy27-tile-surface: #f5f5f5;                  /* video-off / initials / shared backdrop (surface/base) */
+  --fy27-tile-border: #d1d1d1;                   /* default gallery-tile stroke (fg/stroke) */
+  --fy27-tile-inner-border: #ffffff;             /* inner display hairline (fg/stroke, inner) */
+  /* Name-tag chip OVERLAYS media — theme-aware: frosted-light + dark text (light),
+     dark scrim + white text (dark). The high-contrast text keeps it legible over
+     video and over the dark video-off surface in either theme. */
+  --fy27-nametag-bg: rgba(235, 235, 235, 0.95);  /* light: frosted light (surface/raisedfill-alpha) */
+  --fy27-nametag-fg: #212121;                    /* light: text/primary */
+  --fy27-raised-hands: #f2c811;                  /* raised-hand highlight (fixed gold, both modes) */
+  /* AIL pills (Figma POR 1423:20209) — theme-aware (light values here). On
+     selection the theme is kept; only the surface swaps to accent/tertiary
+     (see the `.ail-selected` rule below). */
+  --fy27-ail-surface: #f5f5f5;                    /* Surface/Base */
+  --fy27-ail-icon: #212121;                      /* Icon/Primary */
+  --fy27-ail-track: #acacac;                     /* Surface/Quaternary (empty segment) */
+  --fy27-ail-fill: #5b5fc7;                      /* Brand/Accent Primary (progress) */
+  --fy27-ail-warning: #835c00;                   /* Text/Icon Warning (count + hand) */
+  --fy27-ail-on-accent: #ffffff;                 /* Text/On Accent */
+  --fy27-ail-border: #e1e1e1;                    /* Surface/Border */
+  --fy27-ail-mention: #cc4a31;                   /* Icon/Mention (badge / recording) */
+}
+
+/* Selected AIL pill: keep the current theme; only the background swaps to
+   Brand/Accent Tertiary (theme-aware, so this one rule covers light + dark). */
+.ail-selected {
+  --fy27-ail-surface: var(--fy27-accent-tertiary);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+
+  /* ── FY27 redesign tokens — Teams 2 Mobile foundations (Dark) ─────────── */
+  --fy27-brand-primary: #7f85f5;
+  --fy27-surface-accent-primary: #7f85f5;        /* Surface/Accent Primary (Brand Primary, dark) */
+  --fy27-brand-accent-secondary: #333357;        /* Brand/Accent Secondary (tint 30, dark) */
+  --fy27-accent-tertiary: #2f2f4a;               /* Brand/Accent Tertiary (tint 40) */
+  --fy27-surface-raisedfill-alpha: rgba(41, 41, 41, 0.95); /* Surface/Raised-fill (alpha, dark) — UFD card */
+  --fy27-surface-floating: #333333;              /* Surface/Floating — checkpoint header overlay bar (Dark) */
+  --fy27-surface-dominant: #000000;
+  --fy27-surface-subtlest: #212121;
+  --fy27-surface-raised: #292929;
+  --fy27-surface-chat-incoming: #2e2e2e;         /* incoming chat bubble (dark) — raised vs the #1a1a1a surface */
+  --fy27-surface-border: #404040;
+  --fy27-text-dominant: #ffffff;
+  --fy27-text-global: #ffffff;                   /* Text/On Global (fixed white, over media/scrim) */
+  --fy27-text-primary: #e1e1e1;
+  --fy27-text-secondary: #919191;
+  --fy27-text-interactive: #7f85f5;
+  --fy27-text-disabled: #616161;
+  --fy27-text-on-accent: #000000;
+  --fy27-text-danger: #dc5e62;
+  --fy27-surface-danger: #250909;                /* Surface/Danger (danger badge fill, dark meeting) */
+  --fy27-icon-global: #ffffff;                   /* Icon/On Global (fixed white, over media/scrim) */
+  --fy27-icon-dominant: #ffffff;                 /* Icon/Dominant (highest-contrast on surface) */
+  --fy27-icon-primary: #e1e1e1;
+  --fy27-icon-secondary: #6e6e6e;
+  --fy27-icon-interactive: #7f85f5;              /* Icon/Interactive (Brand Primary) */
+  --fy27-icon-success: #0eb244;                  /* Icon/Success (mic-on / unmuted) */
+  --fy27-icon-danger: #dc5e62;                   /* Icon/Danger (mic-off / muted) */
+  --fy27-icon-mention: #cc4a31;                  /* Icon/Mention (end-call, recording) */
+  --fy27-icon-disabled: #404040;                 /* Icon/Disabled (inactive send) */
+  --fy27-icon-on-accent: #000000;                /* Icon/On Accent (glyph over brand fill) */
+  --fy27-presence-online: #92c353;
+  --fy27-presence-away: #f8d22a;
+  --fy27-presence-dnd: #d74553;
+  --fy27-surface-card: #1c1c1e;
+  --fy27-surface-subtle-base: #141414;           /* Surface/Subtle Base (face.subtlebase) */
+  --fy27-surface-tertiary: #141414;
+  --fy27-surface-base: #1a1a1a;
+  --fy27-fg-stroke: #4d4d4d;
+  --fy27-divider: #292929;
+  --fy27-switch-off: #39393d;
+  --fy27-end-call: #8d2337;
+  --fy27-recording: #cc4a31;
+  /* Meeting tile (gallery square) — dark */
+  --fy27-tile-surface: #1c1c1e;
+  --fy27-tile-border: #3a3a3c;
+  --fy27-tile-inner-border: rgba(255, 255, 255, 0.1);
+  --fy27-nametag-bg: rgba(0, 0, 0, 0.6);         /* dark: scrim chip */
+  --fy27-nametag-fg: #ffffff;                    /* dark: white text */
+  --fy27-raised-hands: #f2c811;
+  /* AIL pills — dark theme defaults (unselected). */
+  --fy27-ail-surface: #1c1c1e;
+  --fy27-ail-icon: #e1e1e1;
+  --fy27-ail-track: #404040;
+  --fy27-ail-fill: #7f85f5;
+  --fy27-ail-warning: #ffb900;
+  --fy27-ail-on-accent: #000000;
+  --fy27-ail-border: #292929;
+  --fy27-ail-mention: #cc4a31;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* FY27 semantic-token utility aliases (bg-/text-/border-fy27-*) */
+  --color-fy27-brand: var(--fy27-brand-primary);
+  --color-fy27-brand-accent-secondary: var(--fy27-brand-accent-secondary);
+  --color-fy27-accent-tertiary: var(--fy27-accent-tertiary);
+  --color-fy27-surface-accent-primary: var(--fy27-surface-accent-primary);
+  --color-fy27-surface-raisedfill-alpha: var(--fy27-surface-raisedfill-alpha);
+  --color-fy27-surface-floating: var(--fy27-surface-floating);
+  --color-fy27-surface: var(--fy27-surface-dominant);
+  --color-fy27-surface-subtlest: var(--fy27-surface-subtlest);
+  --color-fy27-surface-raised: var(--fy27-surface-raised);
+  --color-fy27-surface-chat-incoming: var(--fy27-surface-chat-incoming);
+  --color-fy27-border: var(--fy27-surface-border);
+  --color-fy27-text-dominant: var(--fy27-text-dominant);
+  --color-fy27-text-global: var(--fy27-text-global);
+  --color-fy27-text-primary: var(--fy27-text-primary);
+  --color-fy27-text-interactive: var(--fy27-text-interactive);
+  --color-fy27-text-disabled: var(--fy27-text-disabled);
+  --color-fy27-text-secondary: var(--fy27-text-secondary);
+  --color-fy27-text-on-accent: var(--fy27-text-on-accent);
+  --color-fy27-text-danger: var(--fy27-text-danger);
+  --color-fy27-surface-danger: var(--fy27-surface-danger);
+  --color-fy27-icon-global: var(--fy27-icon-global);
+  --color-fy27-icon-dominant: var(--fy27-icon-dominant);
+  --color-fy27-icon-primary: var(--fy27-icon-primary);
+  --color-fy27-icon-success: var(--fy27-icon-success);
+  --color-fy27-icon-danger: var(--fy27-icon-danger);
+  --color-fy27-icon-secondary: var(--fy27-icon-secondary);
+  --color-fy27-icon-interactive: var(--fy27-icon-interactive);
+  --color-fy27-icon-mention: var(--fy27-icon-mention);
+  --color-fy27-icon-disabled: var(--fy27-icon-disabled);
+  --color-fy27-icon-on-accent: var(--fy27-icon-on-accent);
+  --color-fy27-presence-online: var(--fy27-presence-online);
+  --color-fy27-presence-away: var(--fy27-presence-away);
+  --color-fy27-presence-dnd: var(--fy27-presence-dnd);
+  --color-fy27-surface-card: var(--fy27-surface-card);
+  --color-fy27-surface-subtle-base: var(--fy27-surface-subtle-base);
+  --color-fy27-surface-tertiary: var(--fy27-surface-tertiary);
+  --color-fy27-surface-base: var(--fy27-surface-base);
+  --color-fy27-fg-stroke: var(--fy27-fg-stroke);
+  --color-fy27-divider: var(--fy27-divider);
+  --color-fy27-switch-off: var(--fy27-switch-off);
+  --color-fy27-end-call: var(--fy27-end-call);
+  --color-fy27-recording: var(--fy27-recording);
+  --color-fy27-tile-surface: var(--fy27-tile-surface);
+  --color-fy27-tile-border: var(--fy27-tile-border);
+  --color-fy27-tile-inner-border: var(--fy27-tile-inner-border);
+  --color-fy27-nametag-bg: var(--fy27-nametag-bg);
+  --color-fy27-nametag-fg: var(--fy27-nametag-fg);
+  --color-fy27-raised-hands: var(--fy27-raised-hands);
+  --color-fy27-ail-surface: var(--fy27-ail-surface);
+  --color-fy27-ail-icon: var(--fy27-ail-icon);
+  --color-fy27-ail-track: var(--fy27-ail-track);
+  --color-fy27-ail-fill: var(--fy27-ail-fill);
+  --color-fy27-ail-warning: var(--fy27-ail-warning);
+  --color-fy27-ail-on-accent: var(--fy27-ail-on-accent);
+  --color-fy27-ail-border: var(--fy27-ail-border);
+  --color-fy27-ail-mention: var(--fy27-ail-mention);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  */
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+
+  /* Hide scrollbar for horizontal scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Marquee animation for overflowing text */
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 15s linear infinite;
+  }
+
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     Figma font-name overrides
+     
+     Figma exports font references like 'SF Pro Text:Bold' where the weight
+     is embedded in the family name. CSS treats 'SF Pro Text:Bold' as a
+     single font-family string — the :Bold suffix is NOT a weight specifier.
+     The browser can't find a font with this exact name, falls to sans-serif,
+     and renders everything at default weight 400 (Regular).
+     
+     These attribute selectors match the Figma class-name substrings in
+     Tailwind's font-[...] utilities and override both font-family (→ our
+     --font-sf-pro / --font-sf-display variable with Inter in the chain) and
+     font-weight (→ the correct numeric value).
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* Weight-in-name variants — pin font-weight */
+  [class*="SF_Pro_Text:Regular"] {
+    font-family: var(--font-sf-pro) !important;
+    font-weight: 400 !important;
+  }
+  [class*="SF_Pro_Text:Medium"] {
+    font-family: var(--font-sf-pro) !important;
+    font-weight: 500 !important;
+  }
+  [class*="SF_Pro_Text:Semibold"] {
+    font-family: var(--font-sf-pro) !important;
+    font-weight: 600 !important;
+  }
+  [class*="SF_Pro_Text:Bold"] {
+    font-family: var(--font-sf-pro) !important;
+    font-weight: 700 !important;
+  }
+  [class*="SF_Pro_Display:Semibold"] {
+    font-family: var(--font-sf-display) !important;
+    font-weight: 600 !important;
+  }
+  [class*="SF_Pro:Semibold"] {
+    font-family: var(--font-sf-pro) !important;
+    font-weight: 600 !important;
+  }
+  [class*="SF_Pro:Medium"] {
+    font-family: var(--font-sf-pro) !important;
+    font-weight: 500 !important;
+  }
+  [class*="SF_Pro:600"] {
+    font-family: var(--font-sf-pro) !important;
+    font-weight: 600 !important;
+  }
+
+  /* No-suffix variants — just fix font-family, let Tailwind weight classes work */
+  [class*="font-['SF_Pro_Text'"] {
+    font-family: var(--font-sf-pro) !important;
+  }
+  [class*="font-['SF_Pro_Display'"] {
+    font-family: var(--font-sf-display) !important;
+  }
+}

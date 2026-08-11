@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="40" x2="452" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7a83eb"/>
+      <stop offset="0.55" stop-color="#545bc4"/>
+      <stop offset="1" stop-color="#3a3fa0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+
+  <!-- People (white), upper-right -->
+  <g fill="#ffffff">
+    <circle cx="388" cy="150" r="30" fill-opacity="0.92"/>
+    <path d="M345 232 q0 -41 43 -41 q43 0 43 41 v6 q0 12 -12 12 h-62 q-12 0 -12 -12 z" fill-opacity="0.92"/>
+    <circle cx="312" cy="170" r="40"/>
+    <path d="M256 250 q0 -56 56 -56 q56 0 56 56 v10 q0 14 -14 14 h-84 q-14 0 -14 -14 z"/>
+  </g>
+
+  <!-- T badge: white rounded square with a purple cut-out T -->
+  <rect x="138" y="186" width="182" height="182" rx="40" fill="#ffffff"/>
+  <g fill="#4a4fb0">
+    <rect x="170" y="232" width="118" height="28" rx="7"/>
+    <rect x="215" y="232" width="28" height="96" rx="7"/>
+  </g>
+</svg>

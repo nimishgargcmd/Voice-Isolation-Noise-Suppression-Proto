@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pre-join screen — hardcoded colours after tokenization</title>
+<style>
+  :root{
+    --accent:#5b5fc7; --ink:#1c1c1e; --muted:#616161; --line:#e6e6ea;
+    --ok:#0f7b3f; --okbg:#e7f5ec; --warn:#8a5a00; --warnbg:#fcf3e2; --hard:#b3261e; --hardbg:#fde9e8;
+    --card:#fff; --bg:#f6f6f8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:32px 16px}
+  .wrap{max-width:820px;margin:0 auto}
+  h1{font-size:24px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 24px}
+  h2{font-size:17px;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:8px}
+  .p-ok{background:var(--okbg);color:var(--ok)} .p-hard{background:var(--hardbg);color:var(--hard)} .p-warn{background:var(--warnbg);color:var(--warn)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 14px}
+  .comp{font-weight:600;margin:0 0 6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+  .note{color:var(--muted);font-size:13.5px;margin:2px 0 10px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  td,th{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:middle}
+  th{color:var(--muted);font-weight:600;border-top:none}
+  code{font:12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;background:#f0f0f4;padding:2px 5px;border-radius:5px}
+  .sw{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid rgba(0,0,0,.15);vertical-align:middle;margin-right:6px}
+  .why{color:var(--muted);font-size:12.5px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 22px}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  details{margin:0 0 14px}
+  summary{cursor:pointer;font-weight:600;font-size:15px;padding:8px 0}
+  .applied li{margin:3px 0}
+  .applied code{background:#eef0fb}
+  .foot{color:var(--muted);font-size:12px;margin-top:30px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pre-join screen — colours still hardcoded</h1>
+  <p class="sub">After the 7 token/asset changes + email fix + camera-flip wiring. File: <code>src/app/components/PreJoinPage.tsx</code>. Build: green ✓</p>
+
+  <div class="legend">
+    <span><span class="pill p-ok">tokenized</span> fully on tokens now</span>
+    <span><span class="pill p-hard">hardcoded</span> raw hex / rgba remains</span>
+    <span><span class="pill p-warn">judgment</span> applied literally, flag for review</span>
+  </div>
+
+  <details open class="applied">
+    <summary>What was applied</summary>
+    <ul>
+      <li><b>1.</b> All body text → <code>text-fy27-text-primary</code> (text.primary)</li>
+      <li><b>2.</b> All screen icons → <code>var(--fy27-icon-primary)</code> (icons.primary)</li>
+      <li><b>3.</b> Settings gear → <b>camera-flip</b> glyph (Figma 1143-61232 → the Video Switch icon in that frame), wired to <code>flipCamera()</code> from <code>CameraContext</code> — same as SelfTile</li>
+      <li><b>4.</b> Join button → Figma 1143-60669: <code>bg-fy27-brand</code>, <b>radius 50px → 8px</b>, label <code>text-fy27-text-on-accent</code></li>
+      <li><b>5.</b> Page background <code>bg-black</code> → <code>bg-fy27-surface</code> (surface.primary)</li>
+      <li><b>6.</b> Self-tile video-off bg <code>#292929</code> → <code>bg-fy27-surface-subtle-base</code> (new token added to <code>theme.css</code>: <code>#F8F8F8</code> / <code>#141414</code>)</li>
+      <li><b>7.</b> Video-off circle: purple "UV" initials → real account photo (<code>udayan.jpg</code>, object-cover)</li>
+      <li><b>＋</b> Email corrected <code>uvidyanta@xyz.com → uvidyanta@microsoft.com</code></li>
+      <li><b>＋</b> <b>Video-ON only:</b> self-tile icons → <code>icon.global</code>, text → <code>text.global</code> (fixed white over the black scrim, theme-independent). New <code>--fy27-icon-global</code> / <code>--fy27-text-global</code> tokens added (#FFFFFF both themes). Video-OFF stays primary.</li>
+      <li><b>＋</b> Video-ON bottom scrim aligned to Figma 1143-61232: <code>rgba(0,0,0,0.73) → 0</code> (was 0.5).</li>
+    </ul>
+  </details>
+
+  <h2>Per-component breakdown</h2>
+
+  <div class="card">
+    <div class="comp">Page background <span class="pill p-ok">tokenized</span></div>
+    <div class="note">No hardcoded colour. <code>bg-fy27-surface</code> = #FFFFFF (light) / #000000 (dark).</div>
+  </div>
+
+  <div class="card">
+    <div class="comp">Top bar — X close + title <span class="pill p-ok">tokenized</span></div>
+    <div class="note">X glyph → icons.primary, title → text.primary. No hardcoded colour.</div>
+  </div>
+
+  <div class="card">
+    <div class="comp">Microsoft logo <span class="pill p-hard">hardcoded</span></div>
+    <div class="note">Raster brand asset (<code>ms-logo.png</code>) — colours are baked into the image, not CSS. Not tokenizable by design.</div>
+    <table><tr><th>Colour</th><th>Where</th></tr>
+      <tr><td><span class="sw" style="background:#f25022"></span><code>#F25022</code> · <span class="sw" style="background:#7fba00"></span><code>#7FBA00</code> · <span class="sw" style="background:#00a4ef"></span><code>#00A4EF</code> · <span class="sw" style="background:#ffb900"></span><code>#FFB900</code></td><td class="why">MS 4-square brand mark (in PNG)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="comp">Subtitle "Choose your audio and video settings" <span class="pill p-ok">tokenized</span></div>
+    <div class="note">→ text.primary. No hardcoded colour.</div>
+  </div>
+
+  <div class="card">
+    <div class="comp">Self-tile card <span class="pill p-ok">tokenized</span> <span class="pill p-hard">hardcoded</span></div>
+    <div class="note">Tokenized: video-OFF bg, avatar, and all icons/labels — which now switch by state (<b>video-OFF → icon/text.primary</b>, <b>video-ON → icon/text.global</b> = fixed white, since video-on content sits on the black scrim). The remaining hardcoded values are the two <b>video-ON scrims</b> (intentionally hardcoded), now matched to Figma 1143-61232.</div>
+    <table><tr><th>Colour</th><th>Line</th><th>Why still hardcoded</th></tr>
+      <tr><td><span class="sw" style="background:linear-gradient(#000,transparent)"></span><code>black/50 → transparent</code></td><td>372</td><td class="why">Top scrim (Figma: rgba(0,0,0,0.5)→0, 61px) — video-on</td></tr>
+      <tr><td><span class="sw" style="background:linear-gradient(transparent,#000)"></span><code>rgba(0,0,0,0.73) → rgba(0,0,0,0)</code></td><td>221</td><td class="why">Bottom scrim (Figma: 0→0.73, 100px) — video-on</td></tr>
+    </table>
+    <div class="why">Intentional scrims over arbitrary camera content (kept hardcoded by decision), so a semantic surface token doesn't fit. Values match the Figma node. The icons/text on them use <code>icon/text.global</code> (fixed white in both themes), so contrast holds regardless of light/dark — no caveat.</div>
+  </div>
+
+  <div class="card">
+    <div class="comp">Controls row — Video / Mic / Speaker <span class="pill p-ok">tokenized</span></div>
+    <div class="note">Icons → icons.primary, labels → text.primary. No hardcoded colour.</div>
+  </div>
+
+  <div class="card">
+    <div class="comp">Audio device picker (pop-up menu) <span class="pill p-hard">hardcoded</span></div>
+    <div class="note">The transient iOS-style frosted-glass context menu (only shown on Speaker tap). Left fully hardcoded — it's a system-glass aesthetic with its own contrast model; icons.primary (#212121 in light) would vanish on the dark frosted surface. <b>Flag if you want this tokenized too.</b></div>
+    <table><tr><th>Colour</th><th>Line</th><th>Role</th></tr>
+      <tr><td><span class="sw" style="background:rgba(0,0,0,.2)"></span><code>rgba(0,0,0,0.2)</code></td><td>409</td><td class="why">dismiss scrim</td></tr>
+      <tr><td><span class="sw" style="background:rgb(44,44,46)"></span><code>rgba(44,44,46,0.55)</code></td><td>426</td><td class="why">menu surface (blurred)</td></tr>
+      <tr><td><span class="sw" style="background:#000"></span><code>rgba(0,0,0,.45)</code> + <code>rgba(255,255,255,.1)</code></td><td>430</td><td class="why">shadow + hairline</td></tr>
+      <tr><td><span class="sw" style="background:#98989f"></span><code>#98989F</code></td><td>436, 492</td><td class="why">section header + "Connected" label</td></tr>
+      <tr><td><span class="sw" style="background:rgb(84,84,88)"></span><code>rgba(84,84,88,0.36)</code></td><td>454</td><td class="why">row separators</td></tr>
+      <tr><td><span class="sw" style="background:#fff"></span><code>rgba(255,255,255,0.12)</code></td><td>458</td><td class="why">active/press highlight</td></tr>
+      <tr><td><span class="sw" style="background:#fff"></span><code>white</code></td><td>33, 52, 466, 478</td><td class="why">device icons, checkmark, device name text</td></tr>
+      <tr><td><span class="sw" style="background:#30d158"></span><code>#30D158</code></td><td>490</td><td class="why">"Connected" presence dot</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="comp">Signed-in line <span class="pill p-ok">tokenized</span></div>
+    <div class="note">→ text.primary; email corrected to <code>uvidyanta@microsoft.com</code>. No hardcoded colour.</div>
+  </div>
+
+  <div class="card">
+    <div class="comp">Join now button <span class="pill p-ok">tokenized</span> <span class="pill p-hard">hardcoded</span></div>
+    <div class="note">Rest fill, radius and label are now on the Figma spec / tokens. One hardcoded value remains: the connecting (pressed/loading) fill, for which no token was provided.</div>
+    <table><tr><th>Colour</th><th>Line</th><th>Role</th></tr>
+      <tr><td><span class="sw" style="background:#5b5fc7"></span><code>bg-fy27-brand</code> (#5B5FC7/#7F85F5)</td><td>533</td><td class="why">rest — tokenized ✓</td></tr>
+      <tr><td><span class="sw" style="background:#1f157e"></span><code>#1F157E</code></td><td>533</td><td class="why">connecting state — still hardcoded (no token given)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="comp">"More join options" — Outline button <span class="pill p-ok">tokenized</span></div>
+    <div class="note">Figma <b>Outline</b> variant (1143-60671): transparent bg, <b>1px border = Brand/Accent Primary</b> → <code>border-fy27-brand</code>, label = <b>text/interactive</b> → <code>text-fy27-text-interactive</code>. radius 8, h-52, px-16. (<span class="sw" style="background:#5b5fc7"></span>#5B5FC7 / <span class="sw" style="background:#7f85f5"></span>#7F85F5.) No hardcoded colour.</div>
+  </div>
+
+  <div class="card">
+    <div class="comp">"Privacy and cookies" — Subtle button (new) <span class="pill p-ok">tokenized</span></div>
+    <div class="note">Third button added per Figma 1143-60667 (1143-60673): text-only, transparent, radius 4, h-28, px-8, Button-2 type (13/500/18/-0.08), label = <b>text/interactive</b> → <code>text-fy27-text-interactive</code>. No hardcoded colour.</div>
+  </div>
+
+  <h2>New token added</h2>
+  <div class="card">
+    <div class="note"><b><code>--fy27-surface-subtle-base</code></b> (Surface/Subtle Base · face.subtlebase):
+    <span class="sw" style="background:#f8f8f8"></span><code>#F8F8F8</code> (light) · <span class="sw" style="background:#141414"></span><code>#141414</code> (dark) — used for the video-off self-tile bg.</div>
+    <div class="note"><b><code>--fy27-icon-global</code></b> + <b><code>--fy27-text-global</code></b> (Icon/Text on Global):
+    <span class="sw" style="background:#fff"></span><code>#FFFFFF</code> in both light &amp; dark (fixed, theme-independent) — used for icons/text on the video-on scrim.</div>
+    <div class="note"><code>surface.primary</code> reused the existing <code>fy27-surface</code> utility (same as MeetingHeaderMvp); <code>text.dominant</code> already existed.</div>
+  </div>
+
+  <p class="foot">Generated for the FY27 MVP pre-join tokenization pass · branch <code>mvp1</code>. Lines reference the post-edit file.</p>
+</div>
+</body>
+</html>

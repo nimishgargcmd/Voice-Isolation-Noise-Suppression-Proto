@@ -1,0 +1,140 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Cross-platform font system — self-hosted SF Pro
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Problem: Figma exports font references like 'SF Pro Text:Bold' where the
+   weight is embedded in the family name. CSS treats 'SF Pro Text:Bold' as a
+   single font-family string — it does NOT extract a weight from the colon
+   suffix. On every platform (including iOS, where Safari blocks web access
+   to SF Pro by name), the browser can't find this font, falls to the
+   'sans-serif' generic, and renders at default weight 400 (Regular).
+
+   Solution: Register every Figma font-name variant as a @font-face alias
+   that loads the self-hosted SF Pro variable font (sf-pro.woff2). The
+   font-weight descriptor pins the variable font's wght axis, so
+   'SF Pro Text:Bold' always renders at 700 even when no CSS font-weight
+   property is set on the element.
+
+   This requires ZERO changes to component files — all 100+ existing
+   font-['SF_Pro_Text:Bold',sans-serif] Tailwind classes work as-is.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── SF Pro Text (no weight suffix) → full range ─────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro Display (no weight suffix) → full range ──────────────────── */
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro (no weight suffix) → full range ──────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Figma weight-in-name aliases
+
+   These pin the SF Pro variable font's wght axis to a specific value via
+   the font-weight descriptor. When CSS matches a face and the descriptor
+   is a single value (e.g. 700), the variable font axis is clamped to that
+   value — so the text renders bold even without an explicit font-weight
+   property on the element.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── SF Pro Text:Regular → weight 400 ──────────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro Text:Regular';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro Text:Medium → weight 500 ───────────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro Text:Medium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro Text:Semibold → weight 600 ─────────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro Text:Semibold';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro Text:Bold → weight 700 ─────────────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro Text:Bold';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro Display:Semibold → weight 600 ──────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro Display:Semibold';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro:Medium → weight 500 ────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro:Medium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro:Semibold → weight 600 ──────────────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro:Semibold';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
+
+/* ── SF Pro:600 → weight 600 ───────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'SF Pro:600';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/sf-pro.woff2') format('woff2');
+}
