@@ -30,7 +30,7 @@ import {
   InfoIcon,
 } from "@/app/components/moreMenuIcons";
 import Icon24X from "@/imports/Icon24X24";
-import { AudioModeGlyph } from "@/app/components/AudioModeIcon";
+import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
 import imgThumbsUp from "figma:asset/b7bdd4e332f1134cea6b347137499723925005ef.png";
 import imgRedHeart from "figma:asset/59520d231a783bb20cd3d4f98dfaec2de858b210.png";
 import imgClappingHands from "figma:asset/cebe50ea4c5d9b448454b19dd79074e5c5b4d898.png";
@@ -741,7 +741,7 @@ export function MorePanel({
       description: string;
     }> = [
       { id: "off", label: "Off", description: "No audio filtering." },
-      { id: "noise-suppression", label: "Noise suppression", description: "Reduces Background Noise" },
+      { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
       { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
     ];
 
@@ -757,35 +757,16 @@ export function MorePanel({
           <div className="rounded-[16px] bg-fy27-surface">
             {options.map((option, idx) => {
               const isActive = voiceNoiseMode === option.id;
-              const showModeIcon = option.id !== "off";
               return (
-                <button
+                <AudioSettingListRow
                   key={option.id}
-                  className={`w-full text-left px-[16px] py-[14px] flex items-start gap-[12px] ${idx < options.length - 1 ? "border-b border-fy27-divider" : ""}`}
+                  mode={option.id}
+                  label={option.label}
+                  description={option.description}
+                  isSelected={isActive}
+                  showDivider={idx < options.length - 1}
                   onClick={() => onVoiceNoiseModeChange?.(option.id)}
-                >
-                  <span
-                    className={`mt-[3px] size-[20px] rounded-full border flex items-center justify-center ${isActive ? "border-fy27-icon-interactive" : "border-fy27-icon-secondary"}`}
-                  >
-                    {isActive && <span className="size-[10px] rounded-full bg-fy27-icon-interactive" />}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-[8px] text-[17px] leading-[22px] tracking-[-0.41px] text-fy27-text-primary">
-                      {showModeIcon ? (
-                        <span
-                          className="inline-flex items-center justify-center size-[18px] text-fy27-icon-primary shrink-0"
-                          aria-hidden="true"
-                        >
-                          <AudioModeGlyph mode={option.id} size={10} />
-                        </span>
-                      ) : null}
-                      {option.label}
-                    </span>
-                    <span className="block text-[13px] leading-[18px] text-fy27-text-secondary mt-[2px]">
-                      {option.description}
-                    </span>
-                  </span>
-                </button>
+                />
               );
             })}
           </div>

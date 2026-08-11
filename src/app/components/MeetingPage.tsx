@@ -32,7 +32,7 @@ import { FullscreenContentView } from "@/app/components/FullscreenContentView";
 import { useActiveMeeting, type AgendaItem } from "@/app/components/ActiveMeetingContext";
 import { useCamera } from "@/app/components/CameraContext";
 import { AudioModeProvider } from "@/app/components/AudioModeContext";
-import { AudioModeGlyph } from "@/app/components/AudioModeIcon";
+import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
 
 // Import Figma placeholder images for chat avatars
 import imgBabak from "figma:asset/6900c5f1ebcee87405a464dc927c93633e66e145.png";
@@ -1320,43 +1320,20 @@ export function MeetingPage() {
             <div className="py-[4px]">
               {([
                 { id: "off", label: "Off", description: "No audio filtering." },
-                { id: "noise-suppression", label: "Noise suppression", description: "Reduces Background Noise" },
+                { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
                 { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
               ] as const).map((option, idx, arr) => {
                 const isActive = voiceNoiseMode === option.id;
-                const showModeIcon = option.id !== "off";
                 return (
-                  <button
+                  <AudioSettingListRow
                     key={option.id}
-                    className={`w-full text-left px-[20px] py-[12px] flex items-start gap-[16px] ${idx < arr.length - 1 ? "border-b border-fy27-divider" : ""}`}
+                    mode={option.id}
+                    label={option.label}
+                    description={option.description}
+                    isSelected={isActive}
+                    showDivider={idx < arr.length - 1}
                     onClick={() => requestVoiceNoiseModeChange(option.id, { closeMicSheet: true })}
-                  >
-                    <span className="mt-[2px] inline-flex items-center justify-center shrink-0 size-[24px] text-fy27-icon-primary">
-                      {showModeIcon ? (
-                        <span
-                          className="inline-flex items-center justify-center size-[18px] text-current shrink-0"
-                          aria-hidden="true"
-                        >
-                          <AudioModeGlyph mode={option.id} size={10} />
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[17px] leading-[22px] tracking-[-0.41px] text-fy27-text-primary">
-                        {option.label}
-                      </span>
-                      <span className="block text-[13px] leading-[18px] text-fy27-text-secondary mt-[1px]">
-                        {option.description}
-                      </span>
-                    </span>
-                    <span className="ml-auto mt-[2px] w-[20px] shrink-0 text-fy27-icon-secondary">
-                      {isActive ? (
-                        <svg width={20} height={20} viewBox="0 0 20 20" fill="none" style={{ display: "block" }} aria-hidden="true">
-                          <path d="M4.5 10.5L8 14L15.5 6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      ) : null}
-                    </span>
-                  </button>
+                  />
                 );
               })}
             </div>

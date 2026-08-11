@@ -9,6 +9,7 @@ import { useCamera } from "@/app/components/CameraContext";
 import { useActiveMeeting } from "@/app/components/ActiveMeetingContext";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import { AudioModeGlyph } from "@/app/components/AudioModeIcon";
+import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
 import { useVersion } from "@/app/versioning/VersionContext";
 import { isMvpFamily } from "@/app/versioning/versions";
 
@@ -611,45 +612,20 @@ export function PreJoinPage() {
             </div>
             {([
               { id: "off", label: "Off", description: "No audio filtering." },
-              { id: "noise-suppression", label: "Noise suppression", description: "Reduces Background Noise" },
+              { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
               { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
-            ] as const).map((option) => {
+            ] as const).map((option, idx, arr) => {
               const isSelected = preJoinVoiceNoiseMode === option.id;
               return (
-                <button
+                <AudioSettingListRow
                   key={option.id}
-                  type="button"
+                  mode={option.id}
+                  label={option.label}
+                  description={option.description}
+                  isSelected={isSelected}
+                  showDivider={idx < arr.length - 1}
                   onClick={() => handleSelectPreJoinVoiceNoiseMode(option.id)}
-                  className="w-full px-[20px] py-[12px] flex items-start gap-[16px] text-left text-fy27-text-primary active:opacity-70"
-                >
-                  <span
-                    className={`mt-[2px] inline-flex items-center justify-center h-[22px] w-[22px] rounded-full ${
-                      option.id === "noise-suppression"
-                        ? "text-fy27-brand"
-                        : option.id === "voice-isolation"
-                          ? "text-[#6f56ff]"
-                          : "text-fy27-icon-secondary"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <AudioModeGlyph mode={option.id} size={14} />
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-fy27-text-primary" style={{ fontSize: "17px", letterSpacing: "-0.41px", lineHeight: "22px" }}>
-                      {option.label}
-                    </span>
-                    <span className="block text-fy27-text-secondary mt-[1px]" style={{ fontSize: "13px", lineHeight: "18px" }}>
-                      {option.description}
-                    </span>
-                  </span>
-                  <span className="mt-[2px] w-[20px] shrink-0 text-fy27-icon-secondary">
-                    {isSelected ? (
-                      <svg width={20} height={20} viewBox="0 0 20 20" fill="none" style={{ display: "block" }}>
-                        <path d="M4.5 10.5L8 14L15.5 6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    ) : null}
-                  </span>
-                </button>
+                />
               );
             })}
           </div>
