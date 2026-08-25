@@ -982,7 +982,7 @@ export function MeetingPage() {
     if (!isMvpCheckpoint) return;
     setIsVoiceIsolationConsentOpen(false);
     // Keep existing mode unchanged (off or noise suppression).
-    showToast("Voice Isolation could not be switched on");
+    showToast("Voice Isolation could not be switched on", undefined, { variant: "error" });
   }, [isMvpCheckpoint, showToast]);
   const handleEnterFullscreen = useCallback(() => { setIsFullscreenContent(true); }, []);
   const handleExitFullscreen = useCallback(() => { setIsFullscreenContent(false); }, []);

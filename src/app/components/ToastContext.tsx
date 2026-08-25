@@ -3,10 +3,17 @@ import type { ReactNode } from "react";
 import { useVersion } from "@/app/versioning/VersionContext";
 import { isMvpFamily } from "@/app/versioning/versions";
 import { AudioModeGlyph, type AudioMode } from "@/app/components/AudioModeIcon";
+import { IconDismiss } from "@/app/components/profile/fluentIcons";
+
+type ToastOptions = {
+  iconMode?: Exclude<AudioMode, "off">;
+  muted?: boolean;
+  variant?: "success" | "error";
+};
 
 interface ToastContextValue {
-  /** Show a centred success toast above the bottom bar (~2.5s). */
-  show: (message: string, modeIcon?: AudioMode, options?: { iconMode?: Exclude<AudioMode, "off">; muted?: boolean }) => void;
+  /** Show a centred status toast above the bottom bar (~2.5s). */
+  show: (message: string, modeIcon?: AudioMode, options?: ToastOptions) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -23,7 +30,7 @@ export function useToast(): ToastContextValue {
  * text/secondary. Theme-aware. Shared by the app toast (MVP) and the
  * version-change indicator.
  */
-export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverride, mutedIcon = false }: { message: string; nowrap?: boolean; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean }) {
+export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverride, mutedIcon = false, variant = "success" }: { message: string; nowrap?: boolean; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean; variant?: "success" | "error" }) {
   const effectiveModeIcon = iconModeOverride ?? (modeIcon && modeIcon !== "off" ? modeIcon : undefined);
   const showModeIcon = !!effectiveModeIcon;
   const hideLeadingIcon = modeIcon === "off";
@@ -32,7 +39,11 @@ export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverr
       className={`inline-flex items-center gap-[8px] px-[16px] py-[16px] rounded-[12px] bg-fy27-surface-raised border-[0.5px] border-fy27-surface-raised text-fy27-text-secondary shadow-[0px_0px_2px_rgba(0,0,0,0.12),0px_4px_8px_rgba(0,0,0,0.14)] ${nowrap ? "w-max max-w-none" : "max-w-full"}`}
       style={{ fontFamily: "var(--font-sf-pro)" }}
     >
-      {showModeIcon ? (
+      {variant === "error" ? (
+        <span className="inline-flex items-center justify-center size-[24px] rounded-full border border-fy27-icon-danger text-fy27-icon-danger shrink-0" aria-hidden="true">
+          <IconDismiss size={12} />
+        </span>
+      ) : showModeIcon ? (
         <span
           className={`inline-flex items-center justify-center size-[24px] rounded-full border shrink-0 ${mutedIcon
             ? "bg-transparent border-fy27-icon-secondary text-fy27-icon-secondary"
@@ -59,18 +70,19 @@ export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverr
  * `relative` mobile frame). Auto-dismisses; a new toast replaces the current one.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toastState, setToastState] = useState<{ message: string; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean } | null>(null);
+  const [toastState, setToastState] = useState<{ message: string; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean; variant?: "success" | "error" } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { activeVersionId } = useVersion();
   const isFy27Mvp = isMvpFamily(activeVersionId);
 
-  const show = useCallback((msg: string, modeIcon?: AudioMode, options?: { iconMode?: Exclude<AudioMode, "off">; muted?: boolean }) => {
+  const show = useCallback((msg: string, modeIcon?: AudioMode, options?: ToastOptions) => {
     if (timer.current) clearTimeout(timer.current);
     setToastState({
       message: msg,
       modeIcon,
       iconModeOverride: options?.iconMode,
       mutedIcon: options?.muted,
+      variant: options?.variant,
     });
     timer.current = setTimeout(() => setToastState(null), 2500);
   }, []);
@@ -90,6 +102,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 modeIcon={toastState.modeIcon}
                 iconModeOverride={toastState.iconModeOverride}
                 mutedIcon={toastState.mutedIcon}
+                variant={toastState.variant}
               />
             </div>
           ) : (
@@ -98,7 +111,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               className="flex items-center gap-[8px] px-[16px] py-[12px] rounded-[8px] max-w-full shadow-[0px_6px_20px_rgba(0,0,0,0.35)]"
               style={{ backgroundColor: "rgba(37,37,37,0.96)", animation: "toast-in 0.2s ease-out" }}
             >
-              {(toastState.iconModeOverride || (toastState.modeIcon && toastState.modeIcon !== "off")) ? (
+              {toastState.variant === "error" ? (
+                <span className="inline-flex items-center justify-center size-[20px] rounded-full border border-fy27-icon-danger text-fy27-icon-danger shrink-0" aria-hidden="true">
+                  <IconDismiss size={10} />
+                </span>
+              ) : (toastState.iconModeOverride || (toastState.modeIcon && toastState.modeIcon !== "off")) ? (
                 <span
                   className={`inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${toastState.mutedIcon
                     ? "bg-transparent border-white/35 text-white/75"

@@ -1,16 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import svgPaths from "@/imports/svg-0tmtsigajy";
 import { MicOnIcon } from "@/app/components/MicOnIcon";
 import { MicOffIcon } from "@/app/components/MicOffIcon";
 import { VideoOnIcon } from "@/app/components/VideoOnIcon";
 import { VideoOffIcon } from "@/app/components/VideoOffIcon";
+import { BluetoothIcon, PhoneIcon, SpeakerIcon } from "@/app/components/AudioRouteIcons";
+import { DesktopIcon } from "@/app/components/DesktopIcon";
+import { VideoSwitchIcon } from "@/app/components/VideoSwitchIcon";
+import { BackgroundEffectsIcon } from "@/app/components/moreMenuIcons";
+import { IconCheck, IconChevronRight, IconDismiss, IconSettings } from "@/app/components/profile/fluentIcons";
 import { useCamera } from "@/app/components/CameraContext";
 import { useActiveMeeting } from "@/app/components/ActiveMeetingContext";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import { useVersion } from "@/app/versioning/VersionContext";
 import { isMvpFamily } from "@/app/versioning/versions";
-import settingsIconPaths from "@/imports/svg-3o4pdasyza";
 
 // Pre-join self-view backup image
 import imgSelf from "@/assets/figma/account/udayan.jpg";
@@ -31,58 +34,10 @@ const audioDevices: AudioDevice[] = [
   { id: "bluetooth", name: "AirPods Pro", icon: "bluetooth", connected: true },
 ];
 
-function PhoneIcon() {
-  return (
-    <svg className="size-[24px]" fill="none" viewBox="0 0 24 24">
-      <rect x="6" y="2" width="12" height="20" rx="2" stroke="white" strokeWidth="1.5" />
-      <circle cx="12" cy="18" r="1" fill="white" />
-    </svg>
-  );
-}
-
-function SpeakerAudioIcon() {
-  return (
-    <svg className="size-[20px]" fill="none" viewBox="0 0 20 18.0005">
-      <path d={svgPaths.p8497cc0} fill="white" />
-    </svg>
-  );
-}
-
-function BluetoothIcon() {
-  return (
-    <svg className="size-[24px]" fill="none" viewBox="0 0 24 24">
-      <path
-        d="M6.5 6.5L17.5 17.5L12 22V2L17.5 6.5L6.5 17.5"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/** Fluent Video Switch (flip camera) — 16-grid, currentColor. Same glyph as SelfTile. */
-function VideoSwitch() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 16 16" fill="currentColor" style={{ display: "block" }}>
-      <path d="M2 2.5C2 1.11929 3.11929 0 4.5 0H9.5C10.8807 0 12 1.11929 12 2.5V3.11308L13.8911 2.08241C14.3909 1.81003 15 2.17178 15 2.74096V7.25907C15 7.82825 14.3909 8.19 13.8911 7.91762L12 6.88695V7.5C12 8.88071 10.8807 10 9.5 10H4.5C3.11929 10 2 8.88071 2 7.5V2.5ZM12 5.74808L14 6.8381V3.16193L12 4.25195V5.74808ZM4.5 1C3.67157 1 3 1.67157 3 2.5V7.5C3 8.32843 3.67157 9 4.5 9H9.5C10.3284 9 11 8.32843 11 7.5V2.5C11 1.67157 10.3284 1 9.5 1H4.5ZM1.66913 9.88882C1.34616 10.0121 1.06056 10.1486 0.822726 10.2986C0.407633 10.5603 0 10.9537 0 11.5C0 12.0463 0.407633 12.4397 0.822726 12.7014C1.26283 12.9789 1.86646 13.2103 2.56787 13.3973C3.97801 13.7734 5.89836 14 8 14C8.09854 14 8.19667 13.9995 8.29438 13.9985L7.14645 15.1464C6.95118 15.3417 6.95118 15.6583 7.14645 15.8536C7.34171 16.0488 7.65829 16.0488 7.85355 15.8536L9.85355 13.8536C10.0488 13.6583 10.0488 13.3417 9.85355 13.1464L7.85355 11.1464C7.65829 10.9512 7.34171 10.9512 7.14645 11.1464C6.95118 11.3417 6.95118 11.6583 7.14645 11.8536L8.29139 12.9985C8.19476 12.9995 8.09762 13 8 13C5.95951 13 4.12986 12.7789 2.82553 12.4311C2.16971 12.2562 1.67499 12.0566 1.35605 11.8555C1.0121 11.6387 1 11.506 1 11.5C1 11.494 1.0121 11.3613 1.35605 11.1445C1.63272 10.97 2.04166 10.7967 2.57329 10.6397C2.22446 10.4508 1.9173 10.1947 1.66913 9.88882ZM11.9238 10.3021C12.2165 10.0572 12.4618 9.75753 12.6439 9.41883C12.9212 9.47523 13.1845 9.53664 13.4321 9.60267C14.1335 9.78971 14.7372 10.0211 15.1773 10.2986C15.5924 10.5603 16 10.9537 16 11.5C16 12.0463 15.5924 12.4397 15.1773 12.7014C14.7372 12.9789 14.1335 13.2103 13.4321 13.3973C13.1661 13.4683 12.882 13.5339 12.5819 13.5937C12.278 13.6542 12 13.4175 12 13.1076C12 12.8633 12.176 12.6553 12.4155 12.6071C12.6845 12.553 12.9381 12.4941 13.1745 12.4311C13.8303 12.2562 14.325 12.0566 14.644 11.8555C14.9879 11.6387 15 11.506 15 11.5C15 11.494 14.9879 11.3613 14.644 11.1445C14.325 10.9434 13.8303 10.7438 13.1745 10.5689C12.7987 10.4687 12.3793 10.379 11.9238 10.3021Z" />
-    </svg>
-  );
-}
-
-function SettingsIcon() {
-  return (
-    <svg width={24} height={24} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d={settingsIconPaths.p3489a600} fill="currentColor" />
-    </svg>
-  );
-}
-
 function AudioDeviceIcon({ icon }: { icon: AudioDevice["icon"] }) {
   switch (icon) {
     case "phone": return <PhoneIcon />;
-    case "speaker": return <SpeakerAudioIcon />;
+    case "speaker": return <SpeakerIcon />;
     case "bluetooth": return <BluetoothIcon />;
   }
 }
@@ -270,7 +225,7 @@ export function PreJoinPage() {
             className="size-[28px] inline-flex items-center justify-center"
             style={{ color: tileIconColor }}
           >
-            <SettingsIcon />
+            <IconSettings />
           </span>
           <span className={`text-[12px] leading-[16px] whitespace-nowrap ${tileTextClass}`}>
             A/V settings
@@ -278,12 +233,8 @@ export function PreJoinPage() {
         </button>
       ) : (
         <div className="flex gap-[8px] items-center">
-          <div className="size-[24px] overflow-clip relative shrink-0" style={{ color: tileIconColor }}>
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[16px]">
-              <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20.002 16">
-                <path d={svgPaths.p3f1a9a00} fill="currentColor" />
-              </svg>
-            </div>
+          <div className="size-[24px] inline-flex items-center justify-center shrink-0" style={{ color: tileIconColor }}>
+            <BackgroundEffectsIcon size={20} />
           </div>
           <p className={`text-[12px] ${tileTextClass}`} style={{ fontWeight: 400, lineHeight: "16px" }}>
             Background effects
@@ -298,7 +249,7 @@ export function PreJoinPage() {
         className="size-[24px] flex items-center justify-center shrink-0 cursor-pointer active:opacity-50 transition-opacity duration-100"
         style={{ color: tileIconColor }}
       >
-        <VideoSwitch />
+        <VideoSwitchIcon size={20} />
       </button>
     </div>
   );
@@ -372,11 +323,7 @@ export function PreJoinPage() {
         >
           <div className="h-[28px] w-[28px] flex items-center justify-center shrink-0">
             <div className="size-[24px] overflow-clip relative shrink-0" style={{ color: tileIconColor }}>
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[18px]">
-                <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20 18.0005">
-                  <path d={svgPaths.p8497cc0} fill="currentColor" />
-                </svg>
-              </div>
+              <SpeakerIcon size={20} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
           </div>
           <p className={`text-[12px] text-center ${tileTextClass}`} style={{ fontWeight: 400, lineHeight: "16px" }}>
@@ -401,15 +348,10 @@ export function PreJoinPage() {
           <div className="shrink-0">
             <button
               onClick={handleBack}
+              aria-label="Close pre-join"
               className="size-[48px] flex items-center justify-center"
             >
-              <div className="size-[24px] overflow-clip relative">
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[15.5px]">
-                  <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15.5 15.5">
-                    <path d={svgPaths.p7a03a80} fill="var(--fy27-icon-primary)" />
-                  </svg>
-                </div>
-              </div>
+              <IconDismiss size={20} className="text-fy27-icon-primary" />
             </button>
           </div>
           {/* Title */}
@@ -549,15 +491,7 @@ export function PreJoinPage() {
                         {/* Leading checkmark — occupies space even when unchecked for alignment */}
                         <div className="shrink-0 w-[16px] flex items-center justify-center">
                           {isSelected && (
-                            <svg className="size-[13px]" fill="none" viewBox="0 0 13 13">
-                              <path
-                                d="M1.5 7L5 10.5L11.5 2.5"
-                                stroke="white"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                            <span className="text-white"><IconCheck size={13} /></span>
                           )}
                         </div>
 
@@ -593,7 +527,7 @@ export function PreJoinPage() {
                         </div>
 
                         {/* Trailing device icon */}
-                        <div className="shrink-0 w-[24px] flex items-center justify-center opacity-60">
+                        <div className="shrink-0 w-[24px] flex items-center justify-center opacity-60 text-white">
                           <AudioDeviceIcon icon={device.icon} />
                         </div>
                       </button>
@@ -650,9 +584,7 @@ export function PreJoinPage() {
                     aria-hidden="true"
                   >
                     {isSelected ? (
-                      <svg width={12} height={12} viewBox="0 0 12 12" fill="none" style={{ display: "block" }}>
-                        <path d="M2.5 6L4.8 8.3L9.5 3.7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      <IconCheck size={12} />
                     ) : null}
                   </span>
                   <span className="flex-1 min-w-0">
@@ -677,24 +609,15 @@ export function PreJoinPage() {
               className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
             >
               <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
-                <svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <path d="M4 5.5H20V18.5H4V5.5Z" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M7 15L10 12L12 14L15.5 10.5L19 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="9" cy="9" r="1.25" fill="currentColor" />
-                </svg>
+                <BackgroundEffectsIcon size={24} />
               </span>
               <span className="flex-1 text-[17px] leading-[22px] tracking-[-0.41px]">Background effects</span>
-              <svg width={20} height={20} viewBox="0 0 20 20" fill="none" className="text-fy27-icon-secondary" aria-hidden="true">
-                <path d="M7.5 4.5L13 10L7.5 15.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <IconChevronRight size={20} className="text-fy27-icon-secondary" />
             </button>
             <div className="mx-[20px] h-px bg-fy27-divider" />
             <div className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-fy27-text-primary">
               <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
-                <svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="4" width="18" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M9 21H15M12 17V21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
+                <DesktopIcon size={24} />
               </span>
               <span className="flex-1 min-w-0">
                 <span className="block text-[17px] leading-[22px] tracking-[-0.41px]">Desktop-friendly view</span>
@@ -721,9 +644,7 @@ export function PreJoinPage() {
                   onClick={() => setAvSettingsView("main")}
                   className="size-[40px] inline-flex items-center justify-center text-fy27-icon-primary active:opacity-65"
                 >
-                  <svg width={24} height={24} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M15 5L8 12L15 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <IconChevronRight size={24} className="rotate-180" />
                 </button>
                 <p className="flex-1 pr-[40px] text-center text-fy27-text-primary text-[20px] leading-[26px] font-semibold">Background effects</p>
               </div>
@@ -741,9 +662,7 @@ export function PreJoinPage() {
                   >
                     <span className={`inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${isSelected ? "bg-fy27-brand border-fy27-brand text-white" : "border-fy27-icon-secondary text-transparent"}`} aria-hidden="true">
                       {isSelected ? (
-                        <svg width={12} height={12} viewBox="0 0 12 12" fill="none">
-                          <path d="M2.5 6L4.8 8.3L9.5 3.7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <IconCheck size={12} />
                       ) : null}
                     </span>
                     <span className="text-[17px] leading-[22px] tracking-[-0.41px]">{option.label}</span>

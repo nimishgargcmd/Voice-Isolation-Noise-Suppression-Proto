@@ -35,6 +35,8 @@ generalize a component. All redesign components are **theme-aware** (consume
 | `MeetingStageGallery` | `components/versions/mvp/` | FY27 MVP gallery grid — 14 tightly-packed `MeetingTile`s, spotlight-priority sort. | ✅ | FY27 MVP |
 | **`UBar`** | `components/UBar.tsx` | Meeting control dock (Video·Mic·Chat·More·Copilot); docks to bottom, hairline top border. Keeps on/off + active(filled) logic. | ✅ | used by FY27 MVP |
 | `ubarIcons` | `components/ubarIcons.tsx` | Exact Fluent glyphs — `Camera`/`CameraOff`/`Mic`/`MicOff` (frame 953:30445) + **`CallEnd`** (Fluent 68174:1512, `size` prop). `currentColor`. **Use `CallEnd` for every call-end glyph.** | ✅ | reusable |
+| `AudioRouteIcons` | `components/AudioRouteIcons.tsx` | Canonical Fluent `Phone`/`Speaker`/`Bluetooth` route glyphs with `size`/`className`; `currentColor`. | ✅ | reusable |
+| `DesktopIcon` / `VideoSwitchIcon` | `components/DesktopIcon.tsx` / `components/VideoSwitchIcon.tsx` | Canonical Fluent Desktop 24 Regular and Video Switch 16 Regular glyphs with `size`/`className`. | ✅ | reusable |
 | `MeetingViewsGallery` | `components/versions/mvp/` | FY27 MVP stage — Gallery only (no swipe/dots). | ✅ | FY27 MVP |
 | `BottomNav` | `components/BottomNav.tsx` | Legacy floating control pill. | ✗ (legacy) | Final Vision |
 | Canonical icons | `MicOnIcon`/`MicOffIcon`/`VideoOnIcon`/`VideoOffIcon` (+ `*Indicator`) | `size`/`color` props — **reuse everywhere**. | via `color` | both |
