@@ -56,6 +56,7 @@ function CornerButton({
   onClick?: () => void;
   children: React.ReactNode;
 }) {
+  const audioMode = useAudioMode();
   return (
     <button
       type="button"
@@ -107,7 +108,6 @@ export function SelfTile({
   activeEmoji,
   className = "",
 }: SelfTileProps) {
-  const audioMode = useAudioMode();
   const d = DIMS[orientation];
   const w = width ?? d.w;
   const h = height ?? d.h;

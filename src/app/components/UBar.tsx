@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import svgPaths from "@/imports/svg-s62hwvor1z";
 import { Camera, CameraOff, Mic, MicOff } from "@/app/components/ubarIcons";
-import { AudioModeGlyph, type AudioMode } from "@/app/components/AudioModeIcon";
 
 /**
  * U-bar — meeting control dock (Teams 2 iOS, POR node 1124:15006; redesign
@@ -25,8 +24,6 @@ interface UBarProps {
   onMicLongPress?: () => void;
   /** Long-press threshold for the mic button. */
   micLongPressMs?: number;
-  /** Current selected audio mode for visual state on the mic control. */
-  micAudioMode?: AudioMode;
   /** Visual affordance variant for long-press discoverability. */
   micLongPressHintStyle?: "chevron" | "none";
   /** Disable the video button (e.g. in audio-only mode). */
@@ -106,7 +103,6 @@ export function UBar({
   onMicToggle,
   onMicLongPress,
   micLongPressMs = 420,
-  micAudioMode = "off",
   micLongPressHintStyle = "chevron",
   videoDisabled = false,
 }: UBarProps) {
@@ -163,8 +159,6 @@ export function UBar({
     onMicLongPress?.();
   };
 
-  const showModeOverlay = micAudioMode !== "off";
-
   return (
     <div
       className="w-full shrink-0 bg-fy27-surface border-t border-fy27-fg-stroke"
@@ -186,16 +180,7 @@ export function UBar({
             onClick={handleMicClick}
           >
             {isMicOn ? <Mic /> : <MicOff />}
-            {showModeOverlay && (
-              <span
-                aria-hidden="true"
-                className="absolute right-[7px] bottom-[8px] inline-flex items-center justify-center text-current pointer-events-none"
-                title={micAudioMode === "noise-suppression" ? "Noise suppression on" : "Voice isolation on"}
-              >
-                <AudioModeGlyph mode={micAudioMode} size={9} />
-              </span>
-            )}
-            {!showModeOverlay && onMicLongPress && micLongPressHintStyle !== "none" && (
+            {onMicLongPress && micLongPressHintStyle !== "none" && (
               micLongPressHintStyle === "chevron" ? (
                 <button
                   type="button"

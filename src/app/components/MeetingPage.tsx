@@ -1242,7 +1242,6 @@ export function MeetingPage() {
             onVideoToggle={() => setIsVideoOn(!isVideoOn)}
             onMicToggle={handleMicToggle}
             onMicLongPress={isMvpCheckpoint ? handleOpenVoiceNoiseSheet : undefined}
-            micAudioMode={isMvpCheckpoint ? voiceNoiseMode : "off"}
             micLongPressHintStyle={micLongPressHintStyle}
             videoDisabled={isAudioOnly}
           />
@@ -1325,7 +1324,6 @@ export function MeetingPage() {
               onVideoToggle={() => setIsVideoOn(!isVideoOn)}
               onMicToggle={handleMicToggle}
               onMicLongPress={isMvpCheckpoint ? handleOpenVoiceNoiseSheet : undefined}
-              micAudioMode={isMvpCheckpoint ? voiceNoiseMode : "off"}
               micLongPressHintStyle={micLongPressHintStyle}
               videoDisabled={isAudioOnly}
             />
@@ -1349,14 +1347,14 @@ export function MeetingPage() {
                 Microphone settings
               </div>
             </div>
-              <div
-                className="py-[4px]"
-                onPointerDownCapture={handleVoiceNoiseSheetCapture}
-                onPointerUpCapture={handleVoiceNoiseSheetCapture}
-                onClickCapture={handleVoiceNoiseSheetCapture}
-              >
+            <div
+              className="py-[4px]"
+              onPointerDownCapture={handleVoiceNoiseSheetCapture}
+              onPointerUpCapture={handleVoiceNoiseSheetCapture}
+              onClickCapture={handleVoiceNoiseSheetCapture}
+            >
               {([
-                { id: "off", label: "Off", description: "No audio filtering." },
+                { id: "off", label: "Default", description: "No additional filtering" },
                 { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
                 { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
               ] as const).map((option, idx, arr) => {

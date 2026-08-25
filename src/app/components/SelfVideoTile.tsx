@@ -146,7 +146,7 @@ export function SelfVideoTile({ isMicOn, isVideoOn, isSplit = false, activeEmoji
           </div>
         )}
 
-        {/* Mic + audio mode cluster in the lower-right, matching control association in UBar. */}
+        {/* Mic + audio mode cluster in the lower-right. */}
         <div
           className="absolute flex items-center"
           style={{

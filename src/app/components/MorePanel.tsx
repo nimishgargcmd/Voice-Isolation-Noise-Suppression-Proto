@@ -740,7 +740,7 @@ export function MorePanel({
       label: string;
       description: string;
     }> = [
-      { id: "off", label: "Off", description: "No audio filtering." },
+      { id: "off", label: "Default", description: "No additional filtering" },
       { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
       { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
     ];
