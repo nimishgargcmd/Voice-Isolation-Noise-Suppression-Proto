@@ -267,7 +267,7 @@ export function PreJoinPage() {
           className="flex items-center justify-center gap-[8px] active:opacity-65"
         >
           <span
-            className={`size-[28px] rounded-full inline-flex items-center justify-center ${isVideoOn ? "bg-black/35" : "bg-fy27-surface-raised"}`}
+            className="size-[28px] inline-flex items-center justify-center"
             style={{ color: tileIconColor }}
           >
             <SettingsIcon />
