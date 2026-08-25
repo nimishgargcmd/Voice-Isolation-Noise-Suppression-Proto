@@ -686,7 +686,7 @@ export function PreJoinPage() {
                 Turn on Voice isolation?
               </div>
               <div className="mt-[8px] text-fy27-text-secondary text-[14px] leading-[20px]">
-                To enable precise Voice isolation, we create a voice signature from your audio. What you say is not recorded, only your voice signature is used.
+                To isolate your voice, we create a voice signature from your audio. Your speech isn't recorded or stored.
                 <span>{" "}</span>
                 <a
                   href="https://privacy.microsoft.com/privacystatement"
