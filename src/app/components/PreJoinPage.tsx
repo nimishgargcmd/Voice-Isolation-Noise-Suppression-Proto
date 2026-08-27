@@ -12,6 +12,7 @@ import { IconCheck, IconChevronRight, IconDismiss, IconSettings } from "@/app/co
 import { useCamera } from "@/app/components/CameraContext";
 import { useActiveMeeting } from "@/app/components/ActiveMeetingContext";
 import { BottomSheet } from "@/app/components/BottomSheet";
+import { VoiceIsolationConsentSheet } from "@/app/components/VoiceIsolationConsentSheet";
 import { useVersion } from "@/app/versioning/VersionContext";
 import { isMvpFamily } from "@/app/versioning/versions";
 
@@ -674,45 +675,12 @@ export function PreJoinPage() {
         </BottomSheet>
         )}
 
-        {isMvpCheckpoint && isVoiceIsolationConsentOpen && (
-          <div className="absolute inset-0 z-[95] flex items-center justify-center px-[20px]" style={{ fontFamily: "var(--font-sf-pro)" }}>
-            <button
-              aria-label="Close voice isolation consent"
-              className="absolute inset-0 bg-black/45"
-              onClick={handleDenyVoiceIsolationConsent}
-            />
-            <div className="relative w-full max-w-[360px] rounded-[18px] bg-fy27-surface-raised border border-fy27-divider shadow-[0px_16px_48px_rgba(0,0,0,0.36)] p-[16px]">
-              <div className="text-fy27-text-primary text-[20px] leading-[26px] tracking-[-0.41px] font-semibold">
-                Turn on Voice isolation?
-              </div>
-              <div className="mt-[8px] text-fy27-text-secondary text-[14px] leading-[20px]">
-                To isolate your voice, we create a voice signature from your audio. Your speech isn't recorded or stored.
-                <span>{" "}</span>
-                <a
-                  href="https://privacy.microsoft.com/privacystatement"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-fy27-brand underline"
-                >
-                  Click here to learn more.
-                </a>
-              </div>
-              <div className="mt-[16px] flex justify-end gap-[8px]">
-                <button
-                  className="h-[36px] px-[14px] rounded-[10px] border border-fy27-divider text-fy27-text-primary bg-fy27-surface active:opacity-70"
-                  onClick={handleDenyVoiceIsolationConsent}
-                >
-                  Not now
-                </button>
-                <button
-                  className="h-[36px] px-[14px] rounded-[10px] bg-fy27-brand text-white active:opacity-70"
-                  onClick={handleAcceptVoiceIsolationConsent}
-                >
-                  Turn on
-                </button>
-              </div>
-            </div>
-          </div>
+        {isMvpCheckpoint && (
+          <VoiceIsolationConsentSheet
+            open={isVoiceIsolationConsentOpen}
+            onAccept={handleAcceptVoiceIsolationConsent}
+            onDismiss={handleDenyVoiceIsolationConsent}
+          />
         )}
 
         {/* Signed in text */}

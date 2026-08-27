@@ -33,6 +33,7 @@ import { useActiveMeeting, type AgendaItem } from "@/app/components/ActiveMeetin
 import { useCamera } from "@/app/components/CameraContext";
 import { AudioModeProvider } from "@/app/components/AudioModeContext";
 import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
+import { VoiceIsolationConsentSheet } from "@/app/components/VoiceIsolationConsentSheet";
 
 // Import Figma placeholder images for chat avatars
 import imgBabak from "figma:asset/6900c5f1ebcee87405a464dc927c93633e66e145.png";
@@ -82,6 +83,8 @@ export function MeetingPage() {
   >(null);
   const [isVideoOn, setIsVideoOn] = useState(meeting.isVideoOn);
   const [isMicOn, setIsMicOn] = useState(meeting.isMicOn);
+  // In-meeting A/V settings: crops the self feed to a widescreen frame (mirrors PreJoinPage).
+  const [isDesktopFriendlyView, setIsDesktopFriendlyView] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [activeEmoji, setActiveEmoji] = useState<string | null>(null);
   const { isRecording, setIsRecording, areCaptionsOn, toggleCaptions, notificationCount: notificationCounter, incrementNotificationCount, decrementNotificationCount, resetNotificationCount, lobbyCount, setLobbyCount } = meeting;
@@ -1200,7 +1203,7 @@ export function MeetingPage() {
             <SelfVideoTile isMicOn={isMicOn} isVideoOn={isVideoOn} isSplit={activePanel !== null} activeEmoji={activeEmoji} isHandRaised={isHandRaised} />
           )}
           {currentView !== 0 && isFy27Mvp && !selfInTray && (
-            <FloatingSelfTile isVideoOn={isAudioOnly ? false : isVideoOn} isMicOn={isMicOn} isHandRaised={isHandRaised} activeEmoji={activeEmoji} isSplit={activePanel !== null} />
+            <FloatingSelfTile isVideoOn={isAudioOnly ? false : isVideoOn} isMicOn={isMicOn} isHandRaised={isHandRaised} activeEmoji={activeEmoji} isSplit={activePanel !== null} isDesktopFriendlyView={isDesktopFriendlyView} />
           )}
 
           {/* Live captions box — sits just above the floating self tile (75×100),
@@ -1285,6 +1288,8 @@ export function MeetingPage() {
             enableVoiceNoiseControl={isMvpCheckpoint}
             voiceNoiseMode={voiceNoiseMode}
             onVoiceNoiseModeChange={requestVoiceNoiseModeChange}
+            isDesktopFriendlyView={isDesktopFriendlyView}
+            onDesktopFriendlyViewToggle={() => setIsDesktopFriendlyView((current) => !current)}
           />
         )}
         {activePanel === "agenda" && <AgendaTimerPanel onClose={handleClosePanel} currentTopicName={currentTopic.title} agendaItems={agendaItemsWithStatus} onPause={handleAgendaPause} onReset={handleAgendaReset} isPaused={isAgendaPaused} currentTopicIndex={currentTopicIndex} currentElapsedMin={currentTopicElapsedMin} onSaveItems={handleSaveAgendaItems} />}
@@ -1376,45 +1381,12 @@ export function MeetingPage() {
         </div>
       )}
 
-      {isMvpCheckpoint && isVoiceIsolationConsentOpen && (
-        <div className="absolute inset-0 z-[95] flex items-center justify-center px-[20px]" style={{ fontFamily: "var(--font-sf-pro)" }}>
-          <button
-            aria-label="Close voice isolation consent"
-            className="absolute inset-0 bg-black/45"
-            onClick={handleDenyVoiceIsolationConsent}
-          />
-          <div className="relative w-full max-w-[360px] rounded-[18px] bg-fy27-surface-raised border border-fy27-divider shadow-[0px_16px_48px_rgba(0,0,0,0.36)] p-[16px]">
-            <div className="text-fy27-text-primary text-[20px] leading-[26px] tracking-[-0.41px] font-semibold">
-              Turn on Voice isolation?
-            </div>
-            <div className="mt-[8px] text-fy27-text-secondary text-[14px] leading-[20px]">
-              To isolate your voice, we create a voice signature from your audio. Your speech isn't recorded or stored.
-              <span>{" "}</span>
-              <a
-                href="https://privacy.microsoft.com/privacystatement"
-                target="_blank"
-                rel="noreferrer"
-                className="text-fy27-brand underline"
-              >
-                Click here to learn more.
-              </a>
-            </div>
-            <div className="mt-[16px] flex justify-end gap-[8px]">
-              <button
-                className="h-[36px] px-[14px] rounded-[10px] border border-fy27-divider text-fy27-text-primary bg-fy27-surface active:opacity-70"
-                onClick={handleDenyVoiceIsolationConsent}
-              >
-                Not now
-              </button>
-              <button
-                className="h-[36px] px-[14px] rounded-[10px] bg-fy27-brand text-white active:opacity-70"
-                onClick={handleAcceptVoiceIsolationConsent}
-              >
-                Turn on
-              </button>
-            </div>
-          </div>
-        </div>
+      {isMvpCheckpoint && (
+        <VoiceIsolationConsentSheet
+          open={isVoiceIsolationConsentOpen}
+          onAccept={handleAcceptVoiceIsolationConsent}
+          onDismiss={handleDenyVoiceIsolationConsent}
+        />
       )}
 
       {/* Fullscreen Shared Content — Immersive landscape overlay */}

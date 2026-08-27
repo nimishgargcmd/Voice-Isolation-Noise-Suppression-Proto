@@ -31,6 +31,7 @@ import {
 } from "@/app/components/moreMenuIcons";
 import Icon24X from "@/imports/Icon24X24";
 import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
+import { DesktopIcon } from "@/app/components/DesktopIcon";
 import imgThumbsUp from "figma:asset/b7bdd4e332f1134cea6b347137499723925005ef.png";
 import imgRedHeart from "figma:asset/59520d231a783bb20cd3d4f98dfaec2de858b210.png";
 import imgClappingHands from "figma:asset/cebe50ea4c5d9b448454b19dd79074e5c5b4d898.png";
@@ -68,9 +69,13 @@ interface MorePanelProps {
   voiceNoiseMode?: "off" | "noise-suppression" | "voice-isolation";
   /** Called when the in-meeting audio mode changes. */
   onVoiceNoiseModeChange?: (mode: "off" | "noise-suppression" | "voice-isolation") => void;
+  /** MVP checkpoint: current desktop-friendly view state for the consolidated A/V settings. */
+  isDesktopFriendlyView?: boolean;
+  /** Called when the desktop-friendly view toggle is flipped. */
+  onDesktopFriendlyViewToggle?: () => void;
 }
 
-type NestedView = "main" | "meetingInfo" | "meetingSettings" | "share" | "shareScreen" | "participants" | "voiceNoiseControl";
+type NestedView = "main" | "meetingInfo" | "meetingSettings" | "share" | "shareScreen" | "participants" | "avSettings" | "avSettingsBackgroundEffects";
 
 // Fluent "Closed Caption Off" glyph (Figma POR 1496:15097), shown on the grid
 // tile when live captions are on (tap → hide captions). viewBox 0 0 20 20.
@@ -186,6 +191,8 @@ export function MorePanel({
   enableVoiceNoiseControl = false,
   voiceNoiseMode = "off",
   onVoiceNoiseModeChange,
+  isDesktopFriendlyView = false,
+  onDesktopFriendlyViewToggle,
 }: MorePanelProps) {
   const [currentView, setCurrentView] = React.useState<NestedView>(initialView);
   const { activeVersionId } = useVersion();
@@ -193,6 +200,8 @@ export function MorePanel({
   const isMvpCheckpoint = activeVersionId === "mvp-checkpoint";
   const { meetingTitle } = useActiveMeeting();
   const [reportMeetingOpen, setReportMeetingOpen] = React.useState(false);
+  // Consolidated A/V settings (MVP checkpoint): background effect selection, mirrors PreJoinPage.
+  const [backgroundEffect, setBackgroundEffect] = React.useState<"none" | "blur">("none");
   const noop = () => {};
   const voiceNoiseModeLabel = voiceNoiseMode === "off"
     ? "Off"
@@ -390,10 +399,10 @@ export function MorePanel({
                   {enableVoiceNoiseControl && (
                     <MvpListRow
                       icon={<svg className="size-[24px]" fill="none" viewBox="0 0 24 24"><path d={svgPathsSettings.p366d01f0} fill="currentColor" /></svg>}
-                      label="Microphone settings"
+                      label="A/V settings"
                       subtitle={voiceNoiseModeLabel}
                       trailing={<ChevronRightIcon size={12} />}
-                      onClick={() => setCurrentView("voiceNoiseControl")}
+                      onClick={() => setCurrentView("avSettings")}
                     />
                   )}
                   <MvpListRow
@@ -415,7 +424,9 @@ export function MorePanel({
                   onClick={() => setCurrentView("meetingSettings")}
                 />
               )}
-              <MvpListRow icon={<BackgroundEffectsIcon size={20} />} label="Background effects" onClick={noop} />
+              {!isMvpCheckpoint && (
+                <MvpListRow icon={<BackgroundEffectsIcon size={20} />} label="Background effects" onClick={noop} />
+              )}
               <MvpListRow icon={<CallMyPhoneIcon size={20} />} label="Call my phone" onClick={noop} />
               <MvpListRow icon={<IncomingVideoOffIcon size={20} />} label="Turn off incoming video" onClick={noop} />
               <MvpListRow icon={<HoldIcon size={20} />} label="Put me on hold" onClick={noop} />
@@ -639,10 +650,10 @@ export function MorePanel({
               {enableVoiceNoiseControl && (
                 <MvpListRow
                   icon={<svg className="size-[24px]" fill="none" viewBox="0 0 24 24"><path d={svgPathsSettings.p366d01f0} fill="currentColor" /></svg>}
-                  label="Microphone settings"
+                  label="A/V settings"
                   subtitle={voiceNoiseModeLabel}
                   trailing={<ChevronRightIcon size={12} />}
-                  onClick={() => setCurrentView("voiceNoiseControl")}
+                  onClick={() => setCurrentView("avSettings")}
                 />
               )}
               <MvpListRow
@@ -650,7 +661,9 @@ export function MorePanel({
                 label="Speaker audio"
                 onClick={noop}
               />
-              <MvpListRow icon={<BackgroundEffectsIcon size={20} />} label="Background effects" onClick={noop} />
+              {!enableVoiceNoiseControl && (
+                <MvpListRow icon={<BackgroundEffectsIcon size={20} />} label="Background effects" onClick={noop} />
+              )}
               <MvpListRow icon={<HoldIcon size={20} />} label="Put me on hold" onClick={noop} />
               <MvpListRow icon={<RttIcon size={20} />} label="Turn on RTT for this meeting" onClick={noop} />
               <MvpListRow
@@ -733,8 +746,10 @@ export function MorePanel({
     );
   }
 
-  // In-meeting audio mode selector (MVP checkpoint scope): Off / Noise / Voice.
-  if (currentView === "voiceNoiseControl") {
+  // Consolidated A/V settings (MVP checkpoint scope) — mirrors the pre-join
+  // AV settings sheet: inline microphone-mode list + a Background effects
+  // row that drills into its own sub-view.
+  if (currentView === "avSettings") {
     const options: Array<{
       id: "off" | "noise-suppression" | "voice-isolation";
       label: string;
@@ -747,14 +762,19 @@ export function MorePanel({
 
     return (
       <MultitaskingPanel
-        title="Microphone settings"
-        onClose={() => setCurrentView("meetingSettings")}
+        title="A/V settings"
+        onClose={handleBackToMain}
         actionButton={undefined}
         showFooter={false}
         isNestedView={true}
       >
-        <div className="flex-1 overflow-y-auto bg-transparent pt-[20px] px-[16px] pb-[16px]">
-          <div className="rounded-[16px] bg-fy27-surface">
+        <div className="flex-1 overflow-y-auto bg-transparent pt-[20px] pb-[16px]">
+          <div className="px-[20px] pb-[8px]">
+            <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
+              Microphone settings
+            </p>
+          </div>
+          <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
             {options.map((option, idx) => {
               const isActive = voiceNoiseMode === option.id;
               return (
@@ -766,6 +786,74 @@ export function MorePanel({
                   isSelected={isActive}
                   showDivider={idx < options.length - 1}
                   onClick={() => onVoiceNoiseModeChange?.(option.id)}
+                />
+              );
+            })}
+          </div>
+
+          <div className="px-[20px] pt-[24px] pb-[8px]">
+            <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
+              Video settings
+            </p>
+          </div>
+          <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
+            <MvpListRow
+              icon={<BackgroundEffectsIcon size={20} />}
+              label="Background effects"
+              subtitle={backgroundEffect === "blur" ? "Blur" : "None"}
+              trailing={<ChevronRightIcon size={12} />}
+              onClick={() => setCurrentView("avSettingsBackgroundEffects")}
+            />
+            <div className="mx-[20px] h-px bg-fy27-divider" />
+            <div className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-fy27-text-primary">
+              <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
+                <DesktopIcon size={24} />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[17px] leading-[22px] tracking-[-0.41px]">Desktop-friendly view</span>
+                <span className="block text-fy27-text-secondary text-[13px] leading-[18px] mt-[1px]">Crops the top and bottom to fill a widescreen frame</span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isDesktopFriendlyView}
+                aria-label="Desktop-friendly view"
+                onClick={() => onDesktopFriendlyViewToggle?.()}
+                className={`relative w-[52px] h-[32px] rounded-full shrink-0 transition-colors ${isDesktopFriendlyView ? "bg-fy27-brand" : "bg-fy27-icon-disabled"}`}
+              >
+                <span className={`absolute left-0 top-[2px] size-[28px] rounded-full bg-white shadow-sm transition-transform ${isDesktopFriendlyView ? "translate-x-[22px]" : "translate-x-[2px]"}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </MultitaskingPanel>
+    );
+  }
+
+  // Background effects sub-view, nested under A/V settings (mirrors pre-join).
+  if (currentView === "avSettingsBackgroundEffects") {
+    return (
+      <MultitaskingPanel
+        title="Background effects"
+        onClose={() => setCurrentView("avSettings")}
+        actionButton={undefined}
+        showFooter={false}
+        isNestedView={true}
+      >
+        <div className="flex-1 overflow-y-auto bg-transparent pt-[20px] px-[16px] pb-[16px]">
+          <div className="rounded-[16px] bg-fy27-surface overflow-hidden">
+            {([
+              { id: "none", label: "None" },
+              { id: "blur", label: "Blur" },
+            ] as const).map((option, idx, arr) => {
+              const isSelected = backgroundEffect === option.id;
+              return (
+                <AudioSettingListRow
+                  key={option.id}
+                  label={option.label}
+                  isSelected={isSelected}
+                  showDivider={idx < arr.length - 1}
+                  onClick={() => setBackgroundEffect(option.id)}
                 />
               );
             })}

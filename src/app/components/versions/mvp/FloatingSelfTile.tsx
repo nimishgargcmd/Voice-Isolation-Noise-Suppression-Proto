@@ -11,6 +11,8 @@ interface FloatingSelfTileProps {
   activeEmoji?: string | null;
   /** Multitasking (split) mode — lifts the tile 10px so it clears the panel seam. */
   isSplit?: boolean;
+  /** A/V settings: crops the feed to a widescreen frame (mirrors PreJoinPage). */
+  isDesktopFriendlyView?: boolean;
 }
 
 /**
@@ -22,7 +24,7 @@ interface FloatingSelfTileProps {
  * and the top-right flip control switches the device between front and back camera
  * via the shared CameraContext.
  */
-export function FloatingSelfTile({ isVideoOn, isMicOn, isHandRaised = false, activeEmoji, isSplit = false }: FloatingSelfTileProps) {
+export function FloatingSelfTile({ isVideoOn, isMicOn, isHandRaised = false, activeEmoji, isSplit = false, isDesktopFriendlyView = false }: FloatingSelfTileProps) {
   const [orientation, setOrientation] = useState<SelfOrientation>("portrait");
   const rotate = () => setOrientation((o) => (o === "portrait" ? "landscape" : "portrait"));
 
@@ -62,6 +64,7 @@ export function FloatingSelfTile({ isVideoOn, isMicOn, isHandRaised = false, act
         onRotate={rotate}
         onFlipCamera={flipCamera}
         activeEmoji={activeEmoji}
+        desktopFriendlyView={isDesktopFriendlyView}
       />
     </div>
   );
