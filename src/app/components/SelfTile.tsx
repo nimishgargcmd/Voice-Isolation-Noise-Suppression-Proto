@@ -90,6 +90,8 @@ export interface SelfTileProps {
   /** Reaction emoji (image src) to surface centered on the tile; null clears it. */
   activeEmoji?: string | null;
   className?: string;
+  /** A/V settings: crops the feed to a widescreen frame (mirrors PreJoinPage). */
+  desktopFriendlyView?: boolean;
 }
 
 export function SelfTile({
@@ -106,6 +108,7 @@ export function SelfTile({
   showRotate = true,
   activeEmoji,
   className = "",
+  desktopFriendlyView = false,
 }: SelfTileProps) {
   const audioMode = useAudioMode();
   const d = DIMS[orientation];
@@ -134,7 +137,9 @@ export function SelfTile({
     >
       {/* Display — camera feed (on) or avatar on a surface (off) */}
       {videoOn ? (
-        feed ?? (image && <img src={image} alt="" className="absolute inset-0 size-full object-cover" />)
+        <div className={`absolute inset-0 size-full overflow-hidden transition-transform duration-200 ${desktopFriendlyView ? "scale-y-125" : ""}`}>
+          {feed ?? (image && <img src={image} alt="" className="absolute inset-0 size-full object-cover" />)}
+        </div>
       ) : (
         <div className="absolute inset-0 bg-fy27-tile-surface flex items-center justify-center">
           <div className="rounded-full p-[2px]">

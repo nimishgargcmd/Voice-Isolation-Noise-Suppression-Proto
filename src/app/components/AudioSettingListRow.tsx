@@ -5,7 +5,7 @@ type AudioModeOption = "off" | "noise-suppression" | "voice-isolation";
 interface AudioSettingListRowProps {
   mode?: AudioModeOption;
   label: string;
-  description: string;
+  description?: string;
   isSelected: boolean;
   showDivider?: boolean;
   onClick: () => void;
@@ -41,9 +41,11 @@ export function AudioSettingListRow({
         <span className="block text-[17px] leading-[22px] tracking-[-0.41px] text-fy27-text-primary">
           {label}
         </span>
-        <span className="block text-[13px] leading-[18px] text-fy27-text-secondary mt-[1px]">
-          {description}
-        </span>
+        {description && (
+          <span className="block text-[13px] leading-[18px] text-fy27-text-secondary mt-[1px]">
+            {description}
+          </span>
+        )}
       </span>
     </button>
   );
