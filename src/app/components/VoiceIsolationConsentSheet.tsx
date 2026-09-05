@@ -51,14 +51,14 @@ export function VoiceIsolationConsentSheet({ open, onAccept, onDismiss }: VoiceI
       <div className="pt-[16px] flex flex-col gap-[8px]">
         <button
           type="button"
-          className="w-full h-[44px] rounded-[10px] bg-fy27-brand text-white text-[15px] font-semibold active:opacity-70"
+          className="w-full h-[44px] rounded-[10px] bg-fy27-brand text-fy27-text-on-accent text-[15px] font-semibold active:opacity-70"
           onClick={onAccept}
         >
           Start voice capture
         </button>
         <button
           type="button"
-          className="w-full h-[44px] rounded-[10px] border border-fy27-divider text-fy27-text-primary text-[15px] font-semibold bg-fy27-surface active:opacity-70"
+          className="w-full h-[44px] rounded-[10px] border border-fy27-divider text-fy27-text-primary text-[15px] font-semibold bg-fy27-surface-raised active:opacity-70"
           onClick={onDismiss}
         >
           Dismiss

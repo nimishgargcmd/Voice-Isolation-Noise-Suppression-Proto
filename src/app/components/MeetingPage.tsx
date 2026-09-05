@@ -978,8 +978,8 @@ export function MeetingPage() {
     setVoiceNoiseMode("voice-isolation");
     voiceIsolationUserPreferenceOnRef.current = true;
     r92AutoRestoreVoiceIsolationRef.current = false;
-    showVoiceModeToast("voice-isolation");
-  }, [isMvpCheckpoint, showVoiceModeToast]);
+    showToast("Voice profile creation started", "voice-isolation");
+  }, [isMvpCheckpoint, showToast]);
 
   const handleDenyVoiceIsolationConsent = useCallback(() => {
     if (!isMvpCheckpoint) return;
