@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { MeetingTile, type TileDisplay, type TileState } from "@/app/components/MeetingTile";
 import { SelfTile } from "@/app/components/SelfTile";
 import { useCamera } from "@/app/components/CameraContext";
+import { useSelfControls } from "@/app/components/SelfControlsContext";
+import { useLongPress } from "@/app/lib/useLongPress";
 import imgSelf from "@/assets/figma/account/udayan.jpg";
 
 /**
@@ -103,8 +105,18 @@ function TraySelfTile({
       />
     );
 
+  // Long-press the sticky self tile opens the same options sheet as the floating
+  // self tile (accidental-touch guard: "Lock mic & camera").
+  const { controlsLocked, openSelfOptions } = useSelfControls();
+  const longPress = useLongPress(openSelfOptions);
+
   return (
-    <div className={`shrink-0 bg-fy27-surface ${isVertical ? "" : "sticky right-0 z-10 pl-[2px]"}`}>
+    <div
+      className={`shrink-0 bg-fy27-surface select-none ${isVertical ? "" : "sticky right-0 z-10 pl-[2px]"}`}
+      style={{ WebkitTouchCallout: "none" }}
+      onContextMenu={(e) => e.preventDefault()}
+      {...longPress}
+    >
       <SelfTile
         orientation={isVertical ? "landscape" : "portrait"}
         width={selfW}
@@ -117,6 +129,7 @@ function TraySelfTile({
         showRotate={false}
         onFlipCamera={flipCamera}
         activeEmoji={activeEmoji}
+        locked={controlsLocked}
       />
     </div>
   );

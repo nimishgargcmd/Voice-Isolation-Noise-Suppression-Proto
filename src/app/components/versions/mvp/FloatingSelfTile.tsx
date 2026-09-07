@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SelfTile, type SelfOrientation } from "@/app/components/SelfTile";
 import { useCamera } from "@/app/components/CameraContext";
+import { useSelfControls } from "@/app/components/SelfControlsContext";
+import { useLongPress } from "@/app/lib/useLongPress";
 import imgSelf from "@/assets/figma/account/udayan.jpg";
 
 interface FloatingSelfTileProps {
@@ -22,13 +24,23 @@ interface FloatingSelfTileProps {
  *
  * Shows the live shared camera feed when available (falling back to the self photo),
  * and the top-right flip control switches the device between front and back camera
- * via the shared CameraContext.
+ * via the shared CameraContext. Long-pressing the tile opens the self options sheet
+ * (accidental-touch guard: "Lock mic & camera").
  */
-export function FloatingSelfTile({ isVideoOn, isMicOn, isHandRaised = false, activeEmoji, isSplit = false, isDesktopFriendlyView = false }: FloatingSelfTileProps) {
+export function FloatingSelfTile({
+  isVideoOn,
+  isMicOn,
+  isHandRaised = false,
+  activeEmoji,
+  isSplit = false,
+  isDesktopFriendlyView = false,
+}: FloatingSelfTileProps) {
   const [orientation, setOrientation] = useState<SelfOrientation>("portrait");
   const rotate = () => setOrientation((o) => (o === "portrait" ? "landscape" : "portrait"));
 
   const { stream, cameraError, acquireCamera, setTrackEnabled, attachVideo, facingMode, flipCamera } = useCamera();
+  const { controlsLocked, openSelfOptions } = useSelfControls();
+  const longPress = useLongPress(openSelfOptions);
 
   // Acquire the shared camera on mount; mirror the video on/off toggle to the track.
   useEffect(() => {
@@ -52,7 +64,12 @@ export function FloatingSelfTile({ isVideoOn, isMicOn, isHandRaised = false, act
     );
 
   return (
-    <div className={`absolute z-20 right-[12px] rounded-[4px] shadow-[0px_2px_6px_0px_rgba(0,0,0,0.45),0px_8px_18px_0px_rgba(0,0,0,0.35)] ${isSplit ? "bottom-[17px]" : "bottom-[12px]"}`}>
+    <div
+      className={`absolute z-20 right-[12px] rounded-[4px] shadow-[0px_2px_6px_0px_rgba(0,0,0,0.45),0px_8px_18px_0px_rgba(0,0,0,0.35)] select-none ${isSplit ? "bottom-[17px]" : "bottom-[12px]"}`}
+      style={{ WebkitTouchCallout: "none" }}
+      onContextMenu={(e) => e.preventDefault()}
+      {...longPress}
+    >
       <SelfTile
         orientation={orientation}
         videoOn={isVideoOn}
@@ -65,6 +82,7 @@ export function FloatingSelfTile({ isVideoOn, isMicOn, isHandRaised = false, act
         onFlipCamera={flipCamera}
         activeEmoji={activeEmoji}
         desktopFriendlyView={isDesktopFriendlyView}
+        locked={controlsLocked}
       />
     </div>
   );

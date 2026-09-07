@@ -1,18 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
+import svgPaths from "@/imports/svg-0tmtsigajy";
 import { MicOnIcon } from "@/app/components/MicOnIcon";
 import { MicOffIcon } from "@/app/components/MicOffIcon";
 import { VideoOnIcon } from "@/app/components/VideoOnIcon";
 import { VideoOffIcon } from "@/app/components/VideoOffIcon";
-import { BluetoothIcon, PhoneIcon, SpeakerIcon } from "@/app/components/AudioRouteIcons";
-import { DesktopIcon } from "@/app/components/DesktopIcon";
-import { VideoSwitchIcon } from "@/app/components/VideoSwitchIcon";
-import { BackgroundEffectsIcon } from "@/app/components/moreMenuIcons";
-import { IconCheck, IconChevronRight, IconDismiss, IconSettings } from "@/app/components/profile/fluentIcons";
 import { useCamera } from "@/app/components/CameraContext";
 import { useActiveMeeting } from "@/app/components/ActiveMeetingContext";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import { VoiceIsolationConsentSheet } from "@/app/components/VoiceIsolationConsentSheet";
+import { AudioModeGlyph } from "@/app/components/AudioModeIcon";
+import { BluetoothIcon, PhoneIcon, SpeakerIcon } from "@/app/components/AudioRouteIcons";
+import { VideoSwitchIcon } from "@/app/components/VideoSwitchIcon";
+import { BackgroundEffectsIcon } from "@/app/components/moreMenuIcons";
+import { IconCheck, IconChevronRight, IconDismiss } from "@/app/components/profile/fluentIcons";
 import { useVersion } from "@/app/versioning/VersionContext";
 import { isMvpFamily } from "@/app/versioning/versions";
 
@@ -84,10 +85,7 @@ export function PreJoinPage() {
   const [isMicOn, setIsMicOn] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
   const [preJoinVoiceNoiseMode, setPreJoinVoiceNoiseMode] = useState<"off" | "noise-suppression" | "voice-isolation">(meeting.voiceNoiseMode);
-  const [isAvSettingsSheetOpen, setIsAvSettingsSheetOpen] = useState(false);
-  const [avSettingsView, setAvSettingsView] = useState<"main" | "background-effects">("main");
-  const [backgroundEffect, setBackgroundEffect] = useState<"none" | "blur">("none");
-  const [isDesktopFriendlyView, setIsDesktopFriendlyView] = useState(false);
+  const [isMicSettingsSheetOpen, setIsMicSettingsSheetOpen] = useState(false);
   const [isVoiceIsolationConsentOpen, setIsVoiceIsolationConsentOpen] = useState(false);
   const [hasVoiceIsolationConsent, setHasVoiceIsolationConsent] = useState<boolean>(() => {
     try {
@@ -174,12 +172,12 @@ export function PreJoinPage() {
 
   const handleSelectPreJoinVoiceNoiseMode = (mode: "off" | "noise-suppression" | "voice-isolation") => {
     if (mode === "voice-isolation" && !hasVoiceIsolationConsent) {
-      setIsAvSettingsSheetOpen(false);
+      setIsMicSettingsSheetOpen(false);
       setIsVoiceIsolationConsentOpen(true);
       return;
     }
     setPreJoinVoiceNoiseMode(mode);
-    setIsAvSettingsSheetOpen(false);
+    setIsMicSettingsSheetOpen(false);
   };
 
   const handleAcceptVoiceIsolationConsent = () => {
@@ -210,38 +208,15 @@ export function PreJoinPage() {
 
   const topBarContent = (
     <div className="flex items-center justify-between px-[16px] w-full">
-      {/* Left: A/V settings */}
-      {isMvpCheckpoint ? (
-        <button
-          type="button"
-          onClick={() => {
-            setAvSettingsView("main");
-            setIsAvSettingsSheetOpen(true);
-          }}
-          aria-label="Open audio and video settings"
-          title="Audio and video settings"
-          className="flex items-center justify-center gap-[8px] active:opacity-65"
-        >
-          <span
-            className="size-[28px] inline-flex items-center justify-center"
-            style={{ color: tileIconColor }}
-          >
-            <IconSettings />
-          </span>
-          <span className={`text-[12px] leading-[16px] whitespace-nowrap ${tileTextClass}`}>
-            A/V settings
-          </span>
-        </button>
-      ) : (
-        <div className="flex gap-[8px] items-center">
-          <div className="size-[24px] inline-flex items-center justify-center shrink-0" style={{ color: tileIconColor }}>
-            <BackgroundEffectsIcon size={20} />
-          </div>
-          <p className={`text-[12px] ${tileTextClass}`} style={{ fontWeight: 400, lineHeight: "16px" }}>
-            Background effects
-          </p>
+      {/* Left: Background effects */}
+      <div className="flex gap-[8px] items-center">
+        <div className="size-[24px] inline-flex items-center justify-center shrink-0" style={{ color: tileIconColor }}>
+          <BackgroundEffectsIcon size={20} />
         </div>
-      )}
+        <p className={`text-[12px] ${tileTextClass}`} style={{ fontWeight: 400, lineHeight: "16px" }}>
+          Background effects
+        </p>
+      </div>
       {/* Right: Flip camera (front/back) — wired to the shared camera context, same as SelfTile */}
       <button
         type="button"
@@ -279,9 +254,9 @@ export function PreJoinPage() {
         </div>
       </button>
 
-      {/* Mic toggle */}
+      {/* Mic toggle + desktop-like settings chevron on the right */}
       <div className="flex flex-[1_0_0] flex-col items-center justify-center overflow-clip relative">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center gap-[8px]">
           <button
             onClick={() => {
               playMuteSound();
@@ -295,7 +270,29 @@ export function PreJoinPage() {
             ) : (
               <MicOffIcon size={24} color={tileIconColor} />
             )}
+            {isMvpCheckpoint && preJoinVoiceNoiseMode !== "off" && (
+              <span
+                aria-hidden="true"
+                className="absolute right-[-2px] bottom-[-2px] inline-flex items-center justify-center text-current pointer-events-none"
+                style={{ color: tileIconColor }}
+                title={preJoinVoiceNoiseMode === "noise-suppression" ? "Noise suppression on" : "Voice isolation on"}
+              >
+                <AudioModeGlyph mode={preJoinVoiceNoiseMode} size={10} />
+              </span>
+            )}
           </button>
+
+          {isMvpCheckpoint && (
+            <button
+              type="button"
+              title="Open microphone settings"
+              aria-label="Open microphone settings"
+              onClick={() => setIsMicSettingsSheetOpen(true)}
+              className="h-[24px] w-[24px] inline-flex items-center justify-center rounded-[8px] border border-transparent bg-transparent text-white opacity-85 active:opacity-65"
+            >
+              <IconChevronRight size={10} className="rotate-90" />
+            </button>
+          )}
         </div>
 
         <p className={`mt-[4px] text-[12px] text-center ${tileTextClass}`} style={{ fontWeight: 400, lineHeight: "16px" }}>
@@ -388,7 +385,7 @@ export function PreJoinPage() {
                   <img
                     src={imgSelf}
                     alt="You"
-                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-200 ${backgroundEffect === "blur" ? "blur-[6px] scale-110" : ""} ${isDesktopFriendlyView ? "scale-125" : ""}`}
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                   />
                 ) : (
                   <video
@@ -396,7 +393,7 @@ export function PreJoinPage() {
                     autoPlay
                     playsInline
                     muted
-                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-200 ${backgroundEffect === "blur" ? "blur-[6px] scale-x-[-1] scale-y-110" : "scale-x-[-1]"} ${isDesktopFriendlyView ? "scale-x-[-1] scale-y-125" : ""}`}
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none scale-x-[-1]"
                   />
                 )}
 
@@ -422,7 +419,7 @@ export function PreJoinPage() {
 
                 {/* User avatar (video-off) — show the real account photo, not initials */}
                 <div className="shrink-0 size-[144px] rounded-full overflow-hidden relative">
-                  <img src={imgSelf} alt="You" className={`w-full h-full object-cover ${backgroundEffect === "blur" ? "blur-[6px] scale-110" : ""}`} />
+                  <img src={imgSelf} alt="You" className="w-full h-full object-cover" />
                 </div>
 
                 {/* Controls row (no gradient) */}
@@ -542,30 +539,21 @@ export function PreJoinPage() {
 
         {isMvpCheckpoint && (
         <BottomSheet
-          open={isAvSettingsSheetOpen}
-          onClose={() => {
-            setIsAvSettingsSheetOpen(false);
-            setAvSettingsView("main");
-          }}
-          ariaLabel="Audio and video settings"
+          open={isMicSettingsSheetOpen}
+          onClose={() => setIsMicSettingsSheetOpen(false)}
+          ariaLabel="Microphone settings"
           surfaceClassName="bg-fy27-surface-tertiary"
           className="px-0 pb-[max(14px,env(safe-area-inset-bottom))]"
         >
-          {avSettingsView === "main" ? (
           <div className="py-[4px]">
-            <div className="px-[20px] pt-[4px] pb-[18px] text-center">
-              <p className="text-fy27-text-primary text-[20px]" style={{ fontWeight: 600, lineHeight: "26px" }}>
-                Settings
-              </p>
-            </div>
-            <div className="px-[20px] pb-[8px]">
+            <div className="px-[20px] pt-[4px] pb-[8px]">
               <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
                 Microphone settings
               </p>
             </div>
             {([
-              { id: "off", label: "Default", description: "No additional filtering" },
-              { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
+              { id: "off", label: "Off", description: "No audio filtering." },
+              { id: "noise-suppression", label: "Noise suppression", description: "Reduces Background Noise" },
               { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
             ] as const).map((option) => {
               const isSelected = preJoinVoiceNoiseMode === option.id;
@@ -577,16 +565,16 @@ export function PreJoinPage() {
                   className="w-full px-[20px] py-[12px] flex items-start gap-[16px] text-left text-fy27-text-primary active:opacity-70"
                 >
                   <span
-                    className={`mt-[2px] inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${
-                      isSelected
-                        ? "bg-fy27-brand border-fy27-brand text-white"
-                        : "border-fy27-icon-secondary text-transparent"
+                    className={`mt-[2px] inline-flex items-center justify-center h-[22px] w-[22px] rounded-full ${
+                      option.id === "noise-suppression"
+                        ? "text-fy27-brand"
+                        : option.id === "voice-isolation"
+                          ? "text-[#6f56ff]"
+                          : "text-fy27-icon-secondary"
                     }`}
                     aria-hidden="true"
                   >
-                    {isSelected ? (
-                      <IconCheck size={12} />
-                    ) : null}
+                    <AudioModeGlyph mode={option.id} size={14} />
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block text-fy27-text-primary" style={{ fontSize: "17px", letterSpacing: "-0.41px", lineHeight: "22px" }}>
@@ -596,82 +584,15 @@ export function PreJoinPage() {
                       {option.description}
                     </span>
                   </span>
+                  <span className="mt-[2px] w-[20px] shrink-0 text-fy27-icon-secondary">
+                    {isSelected ? (
+                      <span className="inline-flex size-[20px] items-center justify-center"><IconCheck size={13} /></span>
+                    ) : null}
+                  </span>
                 </button>
               );
             })}
-            <div className="px-[20px] pt-[24px] pb-[8px]">
-              <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
-                Video settings
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setAvSettingsView("background-effects")}
-              className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
-            >
-              <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
-                <BackgroundEffectsIcon size={24} />
-              </span>
-              <span className="flex-1 text-[17px] leading-[22px] tracking-[-0.41px]">Background effects</span>
-              <IconChevronRight size={20} className="text-fy27-icon-secondary" />
-            </button>
-            <div className="mx-[20px] h-px bg-fy27-divider" />
-            <div className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-fy27-text-primary">
-              <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
-                <DesktopIcon size={24} />
-              </span>
-              <span className="flex-1 min-w-0">
-                <span className="block text-[17px] leading-[22px] tracking-[-0.41px]">Desktop-friendly view</span>
-                <span className="block text-fy27-text-secondary text-[13px] leading-[18px] mt-[1px]">Crops the top and bottom to fill a widescreen frame</span>
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isDesktopFriendlyView}
-                aria-label="Desktop-friendly view"
-                onClick={() => setIsDesktopFriendlyView((current) => !current)}
-                className={`relative w-[52px] h-[32px] rounded-full shrink-0 transition-colors ${isDesktopFriendlyView ? "bg-fy27-brand" : "bg-fy27-icon-disabled"}`}
-              >
-                <span className={`absolute left-0 top-[2px] size-[28px] rounded-full bg-white shadow-sm transition-transform ${isDesktopFriendlyView ? "translate-x-[22px]" : "translate-x-[2px]"}`} />
-              </button>
-            </div>
           </div>
-          ) : (
-            <div className="py-[4px]">
-              <div className="px-[12px] pt-[4px] pb-[14px] flex items-center">
-                <button
-                  type="button"
-                  aria-label="Back to settings"
-                  onClick={() => setAvSettingsView("main")}
-                  className="size-[40px] inline-flex items-center justify-center text-fy27-icon-primary active:opacity-65"
-                >
-                  <IconChevronRight size={24} className="rotate-180" />
-                </button>
-                <p className="flex-1 pr-[40px] text-center text-fy27-text-primary text-[20px] leading-[26px] font-semibold">Background effects</p>
-              </div>
-              {([
-                { id: "none", label: "None" },
-                { id: "blur", label: "Blur" },
-              ] as const).map((option) => {
-                const isSelected = backgroundEffect === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setBackgroundEffect(option.id)}
-                    className="w-full px-[20px] py-[14px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
-                  >
-                    <span className={`inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${isSelected ? "bg-fy27-brand border-fy27-brand text-white" : "border-fy27-icon-secondary text-transparent"}`} aria-hidden="true">
-                      {isSelected ? (
-                        <IconCheck size={12} />
-                      ) : null}
-                    </span>
-                    <span className="text-[17px] leading-[22px] tracking-[-0.41px]">{option.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
         </BottomSheet>
         )}
 

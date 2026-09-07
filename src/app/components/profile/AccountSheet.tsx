@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { useProfileDrawer } from "./ProfileDrawerContext";
 import { useTheme } from "@/app/theme/ThemeContext";
@@ -11,6 +12,18 @@ import {
 
 /* Static profile (no in-sheet editing). */
 const PROFILE = { name: "Udayan Vidyanta", role: "Senior Designer", avatar: udayan };
+
+/** Phone/device glyph for the Caller Kit preview rows (no Figma ref for this one). */
+function IconPhoneKit({ className }: { className?: string }) {
+  return (
+    <span className={`inline-flex items-center justify-center size-[24px] ${className ?? ""}`}>
+      <svg width={16} height={20} viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0.75" y="0.75" width="14.5" height="18.5" rx="2.5" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="8" cy="16.5" r="1" fill="currentColor" />
+      </svg>
+    </span>
+  );
+}
 
 /* iOS grouped-list look — semantic tokens (theme-aware). */
 const CARD = "bg-fy27-surface-card";
@@ -67,6 +80,12 @@ export function AccountSheet() {
   const { isOpen, close } = useProfileDrawer();
   const { theme, setTheme } = useTheme();
   const { versions, activeVersionId, setActiveVersion } = useVersion();
+  const navigate = useNavigate();
+
+  const openCallerKitPreview = (state: "locked" | "unlocked") => {
+    close();
+    navigate(`/caller-kit/${state}`);
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -140,6 +159,20 @@ export function AccountSheet() {
                       onClick={() => setActiveVersion(v.id)} />
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Native UI preview — illustrative OS Caller Kit mockup (accidental-touch spec). */}
+            <div className="shrink-0 flex flex-col gap-[8px]">
+              <SectionLabel>Native UI preview</SectionLabel>
+              <div className={`rounded-[24px] overflow-hidden ${CARD}`}>
+                <Row icon={<IconPhoneKit />} label="Caller kit — Home screen" sublabel="Phone unlocked"
+                  trailing={<IconChevronRight size={12} />}
+                  onClick={() => openCallerKitPreview("unlocked")} />
+                <Hair />
+                <Row icon={<IconPhoneKit />} label="Caller kit — Lock screen" sublabel="Phone locked"
+                  trailing={<IconChevronRight size={12} />}
+                  onClick={() => openCallerKitPreview("locked")} />
               </div>
             </div>
           </motion.div>

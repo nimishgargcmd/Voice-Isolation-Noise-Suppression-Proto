@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { ChatPanel } from "@/app/components/ChatPanel";
 import { CopilotPanel } from "@/app/components/CopilotPanel";
 import { MorePanel } from "@/app/components/MorePanel";
@@ -7,6 +7,7 @@ import { RttPanel } from "@/app/components/RttPanel";
 import { useRttSimulation } from "@/app/lib/useRttSimulation";
 import { BottomNav } from "@/app/components/BottomNav";
 import { SelfVideoTile } from "@/app/components/SelfVideoTile";
+import { SelfControlsProvider } from "@/app/components/SelfControlsContext";
 import { FloatingSelfTile } from "@/app/components/versions/mvp/FloatingSelfTile";
 import { AudioOnlyStage } from "@/app/components/versions/mvp/AudioOnlyStage";
 import { CaptionBox } from "@/app/components/CaptionBox";
@@ -74,6 +75,7 @@ const VOICE_NOISE_NUDGE_DISMISS_MS = 10000;
 
 export function MeetingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const meeting = useActiveMeeting();
   const camera = useCamera();
   const { show: showToast } = useToast();
@@ -83,6 +85,18 @@ export function MeetingPage() {
   >(null);
   const [isVideoOn, setIsVideoOn] = useState(meeting.isVideoOn);
   const [isMicOn, setIsMicOn] = useState(meeting.isMicOn);
+  // Accidental-touch guard: long-press the self-tile to disable mic/camera taps.
+  const [controlsLocked, setControlsLocked] = useState(false);
+  // Caller Kit accidental-touch guard: tapping camera-on there jumps straight here
+  // (camera still off) and asks for confirmation on this screen instead.
+  const [cameraOnConfirmOpen, setCameraOnConfirmOpen] = useState(false);
+  useEffect(() => {
+    if ((location.state as { confirmCameraOn?: boolean } | null)?.confirmCameraOn) {
+      setCameraOnConfirmOpen(true);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // In-meeting A/V settings: crops the self feed to a widescreen frame (mirrors PreJoinPage).
   const [isDesktopFriendlyView, setIsDesktopFriendlyView] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -449,6 +463,16 @@ export function MeetingPage() {
     setMorePanelInitialView("main");
     isNotificationHubOpenRef.current = false;
   }, []);
+
+  // Long-press self-tile toggles the mic/camera lock; double-tapping a locked
+  // control in the U-bar unlocks (handled inside UBar via onUnlockControls).
+  const handleToggleControlsLock = useCallback(() => {
+    setControlsLocked((prev) => {
+      const next = !prev;
+      showToast(next ? "Mic & camera locked" : "Mic & camera unlocked");
+      return next;
+    });
+  }, [showToast]);
 
   // Handle mic toggle with sound alerts
   const handleMicToggle = () => {
@@ -1082,6 +1106,7 @@ export function MeetingPage() {
 
   return (
     <AudioModeProvider value={voiceNoiseMode}>
+    <SelfControlsProvider controlsLocked={controlsLocked} onToggleControlsLock={handleToggleControlsLock}>
     <div className={meetingThemeClass} style={{ display: "contents" }}>
       {/* Meeting Content - Vertical Stack */}
       <div className="absolute top-0 bottom-0 left-0 right-0 flex flex-col bg-fy27-surface pt-[59px]">
@@ -1203,7 +1228,14 @@ export function MeetingPage() {
             <SelfVideoTile isMicOn={isMicOn} isVideoOn={isVideoOn} isSplit={activePanel !== null} activeEmoji={activeEmoji} isHandRaised={isHandRaised} />
           )}
           {currentView !== 0 && isFy27Mvp && !selfInTray && (
-            <FloatingSelfTile isVideoOn={isAudioOnly ? false : isVideoOn} isMicOn={isMicOn} isHandRaised={isHandRaised} activeEmoji={activeEmoji} isSplit={activePanel !== null} isDesktopFriendlyView={isDesktopFriendlyView} />
+            <FloatingSelfTile
+              isVideoOn={isAudioOnly ? false : isVideoOn}
+              isMicOn={isMicOn}
+              isHandRaised={isHandRaised}
+              activeEmoji={activeEmoji}
+              isSplit={activePanel !== null}
+              isDesktopFriendlyView={isDesktopFriendlyView}
+            />
           )}
 
           {/* Live captions box — sits just above the floating self tile (75×100),
@@ -1247,6 +1279,8 @@ export function MeetingPage() {
             onMicLongPress={isMvpCheckpoint ? handleOpenVoiceNoiseSheet : undefined}
             micLongPressHintStyle={micLongPressHintStyle}
             videoDisabled={isAudioOnly}
+            controlsLocked={controlsLocked}
+            onUnlockControls={handleToggleControlsLock}
           />
         )}
 
@@ -1331,6 +1365,8 @@ export function MeetingPage() {
               onMicLongPress={isMvpCheckpoint ? handleOpenVoiceNoiseSheet : undefined}
               micLongPressHintStyle={micLongPressHintStyle}
               videoDisabled={isAudioOnly}
+              controlsLocked={controlsLocked}
+              onUnlockControls={handleToggleControlsLock}
             />
           </div>
         )}
@@ -1389,6 +1425,33 @@ export function MeetingPage() {
         />
       )}
 
+      {/* Caller Kit accidental-touch guard: camera was tapped on there — confirm
+          here, on the meeting stage, before actually turning it on. */}
+      {cameraOnConfirmOpen && (
+        <div className="absolute inset-0 z-[90] flex items-center justify-center bg-black/40">
+          <div className="w-[270px] rounded-[14px] overflow-hidden bg-[#2c2c2e] text-center" style={{ fontFamily: "var(--font-sf-pro)" }}>
+            <div className="px-[16px] pt-[18px] pb-[16px]">
+              <div className="text-white text-[17px] font-semibold">Turn camera on?</div>
+              <div className="text-white/70 text-[13px] mt-[4px]">Others in the meeting will see your video.</div>
+            </div>
+            <div className="flex border-t border-white/15">
+              <button
+                onClick={() => setCameraOnConfirmOpen(false)}
+                className="flex-1 py-[12px] text-[17px] text-[#0a84ff] border-r border-white/15"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { setIsVideoOn(true); setCameraOnConfirmOpen(false); }}
+                className="flex-1 py-[12px] text-[17px] font-semibold text-[#0a84ff]"
+              >
+                Turn On
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Fullscreen Shared Content — Immersive landscape overlay */}
       {isFullscreenContent && (
         <FullscreenContentView
@@ -1413,6 +1476,7 @@ export function MeetingPage() {
         }
       `}</style>
     </div>
+    </SelfControlsProvider>
     </AudioModeProvider>
   );
 }

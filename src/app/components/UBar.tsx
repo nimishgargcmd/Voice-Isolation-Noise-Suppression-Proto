@@ -28,6 +28,12 @@ interface UBarProps {
   micLongPressHintStyle?: "chevron" | "none";
   /** Disable the video button (e.g. in audio-only mode). */
   videoDisabled?: boolean;
+  /** Guards mic/camera against accidental taps — single taps are inert; double-tap unlocks. */
+  controlsLocked?: boolean;
+  /** Fired when a double-tap on the (locked) mic or camera button is detected. */
+  onUnlockControls?: () => void;
+  /** Max gap between taps counted as a double-tap while locked. */
+  unlockDoubleTapMs?: number;
 }
 
 function MicLongPressHint({ style }: { style: "chevron" | "none" }) {
@@ -41,16 +47,26 @@ function MicLongPressHint({ style }: { style: "chevron" | "none" }) {
   );
 }
 
-function Btn({ label, active, onClick, disabled, children }: {
-  label: string; active?: boolean; onClick: () => void; disabled?: boolean; children: React.ReactNode;
+/** Small padlock badge — replaces the long-press hint while controls are locked. */
+function LockHint() {
+  return (
+    <svg className="block" width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6h-1A1.5 1.5 0 0 0 2 7.5v6A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12.5 6h-1V4.5A3.5 3.5 0 0 0 8 1Zm2.5 5h-5V4.5a2.5 2.5 0 0 1 5 0V6Z" />
+    </svg>
+  );
+}
+
+function Btn({ label, active, onClick, disabled, locked, children }: {
+  label: string; active?: boolean; onClick: () => void; disabled?: boolean; locked?: boolean; children: React.ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
       aria-label={label}
       aria-pressed={active}
+      aria-disabled={locked || undefined}
       disabled={disabled}
-      className="shrink-0 size-[56px] rounded-[16px] flex items-center justify-center active:opacity-60 transition-opacity disabled:opacity-40 disabled:pointer-events-none disabled:text-fy27-icon-disabled"
+      className={`relative shrink-0 size-[56px] rounded-[16px] flex items-center justify-center active:opacity-60 transition-opacity disabled:opacity-40 disabled:pointer-events-none disabled:text-fy27-icon-disabled ${locked ? "opacity-40 text-fy27-icon-disabled" : ""}`}
     >
       {children}
     </button>
@@ -105,10 +121,28 @@ export function UBar({
   micLongPressMs = 420,
   micLongPressHintStyle = "chevron",
   videoDisabled = false,
+  controlsLocked = false,
+  onUnlockControls,
+  unlockDoubleTapMs = 350,
 }: UBarProps) {
   const chatOn = activePanel === "chat";
   const micHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const micLongPressTriggeredRef = useRef(false);
+  const lastLockedTapRef = useRef<{ target: "video" | "mic" | null; time: number }>({ target: null, time: 0 });
+
+  // While locked, a single tap on mic/camera is inert; a second tap on the
+  // *same* control within the window unlocks. Prevents accidental single taps
+  // (palm brushes, thumb slips) from muting/unmuting or turning the camera on.
+  const handleLockedTap = (target: "video" | "mic") => {
+    const now = Date.now();
+    const last = lastLockedTapRef.current;
+    if (last.target === target && now - last.time < unlockDoubleTapMs) {
+      lastLockedTapRef.current = { target: null, time: 0 };
+      onUnlockControls?.();
+    } else {
+      lastLockedTapRef.current = { target, time: now };
+    }
+  };
 
   const clearMicHoldTimer = () => {
     if (micHoldTimerRef.current) {
@@ -118,7 +152,7 @@ export function UBar({
   };
 
   const handleMicPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!onMicLongPress) return;
+    if (!onMicLongPress || controlsLocked) return;
     micLongPressTriggeredRef.current = false;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -149,6 +183,10 @@ export function UBar({
       micLongPressTriggeredRef.current = false;
       return;
     }
+    if (controlsLocked) {
+      handleLockedTap("mic");
+      return;
+    }
     onMicToggle();
   };
 
@@ -165,14 +203,20 @@ export function UBar({
       style={{ fontFamily: "var(--font-sf-pro)" }}
     >
       <div className="flex items-center justify-between px-[16px] py-[12px] text-fy27-icon-primary">
-        <Btn label={isVideoOn ? "Turn camera off" : "Turn camera on"} onClick={onVideoToggle} disabled={videoDisabled}>
+        <Btn
+          label={isVideoOn ? "Turn camera off" : "Turn camera on"}
+          onClick={controlsLocked ? () => handleLockedTap("video") : onVideoToggle}
+          disabled={videoDisabled}
+          locked={controlsLocked}
+        >
           {isVideoOn ? <Camera /> : <CameraOff />}
         </Btn>
 
         <div className="relative shrink-0">
           <button
             aria-label={isMicOn ? "Mute" : "Unmute"}
-            className="relative size-[56px] rounded-[16px] flex items-center justify-center active:opacity-60 transition-opacity"
+            aria-disabled={controlsLocked || undefined}
+            className={`relative size-[56px] rounded-[16px] flex items-center justify-center active:opacity-60 transition-opacity ${controlsLocked ? "opacity-40 text-fy27-icon-disabled" : ""}`}
             onPointerDown={handleMicPointerDown}
             onPointerUp={handleMicPointerUp}
             onPointerCancel={handleMicPointerUp}
@@ -180,25 +224,35 @@ export function UBar({
             onClick={handleMicClick}
           >
             {isMicOn ? <Mic /> : <MicOff />}
-            {onMicLongPress && micLongPressHintStyle !== "none" && (
-              micLongPressHintStyle === "chevron" ? (
-                <button
-                  type="button"
-                  className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary active:opacity-70"
-                  title="Open microphone settings"
-                  aria-label="Open microphone settings"
-                  onClick={handleMicHintTap}
-                >
-                  <MicLongPressHint style={micLongPressHintStyle} />
-                </button>
-              ) : (
-                <span
-                  aria-hidden="true"
-                  className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary"
-                  title="Press and hold"
-                >
-                  <MicLongPressHint style={micLongPressHintStyle} />
-                </span>
+            {controlsLocked ? (
+              <span
+                aria-hidden="true"
+                className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary"
+                title="Locked — double-tap to unlock"
+              >
+                <LockHint />
+              </span>
+            ) : (
+              onMicLongPress && micLongPressHintStyle !== "none" && (
+                micLongPressHintStyle === "chevron" ? (
+                  <button
+                    type="button"
+                    className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary active:opacity-70"
+                    title="Open microphone settings"
+                    aria-label="Open microphone settings"
+                    onClick={handleMicHintTap}
+                  >
+                    <MicLongPressHint style={micLongPressHintStyle} />
+                  </button>
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary"
+                    title="Press and hold"
+                  >
+                    <MicLongPressHint style={micLongPressHintStyle} />
+                  </span>
+                )
               )
             )}
           </button>
