@@ -31,7 +31,8 @@ import {
 } from "@/app/components/moreMenuIcons";
 import Icon24X from "@/imports/Icon24X24";
 import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
-import { DesktopIcon } from "@/app/components/DesktopIcon";
+import { DesktopFriendlyIcon } from "@/app/components/DesktopFriendlyIcon";
+import { IconChevronRight } from "@/app/components/profile/fluentIcons";
 import imgThumbsUp from "figma:asset/b7bdd4e332f1134cea6b347137499723925005ef.png";
 import imgRedHeart from "figma:asset/59520d231a783bb20cd3d4f98dfaec2de858b210.png";
 import imgClappingHands from "figma:asset/cebe50ea4c5d9b448454b19dd79074e5c5b4d898.png";
@@ -204,7 +205,7 @@ export function MorePanel({
   const [backgroundEffect, setBackgroundEffect] = React.useState<"none" | "blur">("none");
   const noop = () => {};
   const voiceNoiseModeLabel = voiceNoiseMode === "off"
-    ? "Off"
+    ? "Default"
     : voiceNoiseMode === "noise-suppression"
       ? "Noise suppression"
       : "Voice isolation";
@@ -783,9 +784,9 @@ export function MorePanel({
         showFooter={false}
         isNestedView={true}
       >
-        <div className="flex-1 overflow-y-auto bg-transparent pt-[20px] pb-[16px]">
+        <div className="flex-1 overflow-y-auto bg-fy27-surface-base pt-[20px] pb-[16px]">
           <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
-            {options.map((option, idx) => {
+            {options.map((option) => {
               const isActive = voiceNoiseMode === option.id;
               return (
                 <AudioSettingListRow
@@ -794,7 +795,6 @@ export function MorePanel({
                   label={option.label}
                   description={option.description}
                   isSelected={isActive}
-                  showDivider={idx < options.length - 1}
                   onClick={() => onVoiceNoiseModeChange?.(option.id)}
                 />
               );
@@ -815,23 +815,26 @@ export function MorePanel({
         showFooter={false}
         isNestedView={true}
       >
-        <div className="flex-1 overflow-y-auto bg-transparent pt-[20px] pb-[16px]">
+        <div className="flex-1 overflow-y-auto bg-fy27-surface-base pt-[20px] pb-[16px]">
           <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
-            <MvpListRow
-              icon={<BackgroundEffectsIcon size={20} />}
-              label="Background effects"
-              subtitle={backgroundEffect === "blur" ? "Blur" : "None"}
-              trailing={<ChevronRightIcon size={12} />}
+            <button
+              type="button"
+              className="w-full min-h-[64px] px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
               onClick={() => setCurrentView("videoSettingsBackgroundEffects")}
-            />
-            <div className="mx-[20px] h-px bg-fy27-divider" />
+            >
+              <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
+                <BackgroundEffectsIcon size={24} />
+              </span>
+              <span className="flex-1 min-w-0 text-[17px] leading-[22px]">Background effects</span>
+              <span className="shrink-0 text-fy27-icon-secondary"><IconChevronRight size={20} /></span>
+            </button>
             <div className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-fy27-text-primary">
               <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
-                <DesktopIcon size={24} />
+                <DesktopFriendlyIcon />
               </span>
               <span className="flex-1 min-w-0">
-                <span className="block text-[17px] leading-[22px] tracking-[-0.41px]">Desktop-friendly view</span>
-                <span className="block text-fy27-text-secondary text-[13px] leading-[18px] mt-[1px]">Crops the top and bottom to fill a widescreen frame</span>
+                <span className="block text-[17px] leading-[22px]">Desktop-friendly view</span>
+                <span className="block text-fy27-text-secondary text-[13px] leading-[18px] mt-[1px]">Crops your video to 16:9 feed</span>
               </span>
               <button
                 type="button"

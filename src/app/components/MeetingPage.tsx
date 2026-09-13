@@ -1379,26 +1379,26 @@ export function MeetingPage() {
             className="absolute inset-0 bg-black/35"
             onClick={() => setIsVoiceNoiseSheetOpen(false)}
           />
-          <div className="relative w-full max-w-[430px] rounded-t-[22px] bg-fy27-surface-tertiary border-t border-x border-fy27-divider shadow-[0px_-10px_36px_rgba(0,0,0,0.42)] pb-[max(10px,env(safe-area-inset-bottom))]">
+          <div className="relative w-full max-w-[430px] rounded-t-[22px] bg-fy27-surface-base border-t border-x border-fy27-divider shadow-[0px_-10px_36px_rgba(0,0,0,0.42)] pb-[max(10px,env(safe-area-inset-bottom))]">
             <div className="pt-[8px] pb-[4px] flex justify-center">
               <span className="h-[4px] w-[44px] rounded-full bg-fy27-divider" aria-hidden="true" />
             </div>
             <div className="px-[16px] pt-[4px] pb-[10px]">
-              <div className="text-fy27-text-primary text-[20px] leading-[28px] tracking-[-0.45px] font-semibold">
+              <div className="text-center text-fy27-text-primary text-[20px] leading-[28px] font-semibold">
                 Microphone settings
               </div>
             </div>
-            <div
-              className="py-[4px]"
-              onPointerDownCapture={handleVoiceNoiseSheetCapture}
-              onPointerUpCapture={handleVoiceNoiseSheetCapture}
-              onClickCapture={handleVoiceNoiseSheetCapture}
-            >
+              <div
+                className="mx-[16px] mb-[8px] rounded-[16px] bg-fy27-surface overflow-hidden"
+                onPointerDownCapture={handleVoiceNoiseSheetCapture}
+                onPointerUpCapture={handleVoiceNoiseSheetCapture}
+                onClickCapture={handleVoiceNoiseSheetCapture}
+              >
               {([
                 { id: "off", label: "Default", description: "No additional filtering" },
                 { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
                 { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
-              ] as const).map((option, idx, arr) => {
+              ] as const).map((option) => {
                 const isActive = voiceNoiseMode === option.id;
                 return (
                   <AudioSettingListRow
@@ -1407,7 +1407,6 @@ export function MeetingPage() {
                     label={option.label}
                     description={option.description}
                     isSelected={isActive}
-                    showDivider={idx < arr.length - 1}
                     onClick={() => requestVoiceNoiseModeChange(option.id, { closeMicSheet: true })}
                   />
                 );

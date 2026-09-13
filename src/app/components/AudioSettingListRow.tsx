@@ -1,4 +1,6 @@
 import React from "react";
+import { AudioSettingIcon } from "@/app/components/AudioSettingIcon";
+import { IconCheck } from "@/app/components/profile/fluentIcons";
 
 type AudioModeOption = "off" | "noise-suppression" | "voice-isolation";
 
@@ -12,6 +14,7 @@ interface AudioSettingListRowProps {
 }
 
 export function AudioSettingListRow({
+  mode,
   label,
   description,
   isSelected,
@@ -22,23 +25,12 @@ export function AudioSettingListRow({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left px-[20px] py-[12px] flex items-start gap-[12px] ${showDivider ? "border-b border-fy27-divider" : ""}`}
+      aria-pressed={isSelected}
+      className={`w-full min-h-[64px] text-left px-[20px] py-[12px] flex items-center gap-[16px] active:opacity-70 ${showDivider ? "border-b border-fy27-divider" : ""}`}
     >
-      <span
-        className={`mt-[2px] inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${
-          isSelected ? "bg-fy27-brand border-fy27-brand text-white" : "border-fy27-icon-secondary text-transparent"
-        }`}
-        aria-hidden="true"
-      >
-        {isSelected ? (
-          <svg width={12} height={12} viewBox="0 0 12 12" fill="none" style={{ display: "block" }}>
-            <path d="M2.5 6L4.8 8.3L9.5 3.7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        ) : null}
-      </span>
-
-      <span className="min-w-0">
-        <span className="block text-[17px] leading-[22px] tracking-[-0.41px] text-fy27-text-primary">
+      {mode && <AudioSettingIcon mode={mode} />}
+      <span className="flex-1 min-w-0">
+        <span className="block text-[17px] leading-[22px] text-fy27-text-primary">
           {label}
         </span>
         {description && (
@@ -46,6 +38,12 @@ export function AudioSettingListRow({
             {description}
           </span>
         )}
+      </span>
+      <span
+        className={`inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${isSelected ? "bg-fy27-brand border-fy27-brand text-white" : "border-fy27-icon-secondary text-transparent"}`}
+        aria-hidden="true"
+      >
+        {isSelected && <IconCheck size={12} />}
       </span>
     </button>
   );

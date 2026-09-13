@@ -5,7 +5,7 @@ import { MicOffIcon } from "@/app/components/MicOffIcon";
 import { VideoOnIcon } from "@/app/components/VideoOnIcon";
 import { VideoOffIcon } from "@/app/components/VideoOffIcon";
 import { BluetoothIcon, PhoneIcon, SpeakerIcon } from "@/app/components/AudioRouteIcons";
-import { DesktopIcon } from "@/app/components/DesktopIcon";
+import { DesktopFriendlyIcon } from "@/app/components/DesktopFriendlyIcon";
 import { VideoSwitchIcon } from "@/app/components/VideoSwitchIcon";
 import { BackgroundEffectsIcon } from "@/app/components/moreMenuIcons";
 import { IconCheck, IconChevronRight, IconDismiss, IconSettings } from "@/app/components/profile/fluentIcons";
@@ -13,6 +13,8 @@ import { useCamera } from "@/app/components/CameraContext";
 import { useActiveMeeting } from "@/app/components/ActiveMeetingContext";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import { VoiceIsolationConsentSheet } from "@/app/components/VoiceIsolationConsentSheet";
+import { AudioSettingIcon } from "@/app/components/AudioSettingIcon";
+import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
 import { useToast } from "@/app/components/ToastContext";
 import { useVersion } from "@/app/versioning/VersionContext";
 import { isMvpFamily } from "@/app/versioning/versions";
@@ -206,6 +208,11 @@ export function PreJoinPage() {
     : preJoinVoiceNoiseMode === "noise-suppression"
       ? "Noise suppression"
       : "Voice isolation";
+  const preJoinVoiceNoiseModeDescription = preJoinVoiceNoiseMode === "off"
+    ? "No additional filtering"
+    : preJoinVoiceNoiseMode === "noise-suppression"
+      ? "Reduces background noise"
+      : "Keeps only your voice audible";
 
   const handleBack = () => {
     navigate("/calendar", { replace: true });
@@ -557,56 +564,44 @@ export function PreJoinPage() {
             setAvSettingsView("main");
           }}
           ariaLabel="Audio and video settings"
-          surfaceClassName="bg-fy27-surface-tertiary"
+          surfaceClassName="bg-fy27-surface-base"
+          handle={false}
           className="px-0 pb-[max(14px,env(safe-area-inset-bottom))]"
         >
           {avSettingsView === "main" ? (
-          <div className="py-[4px]">
-            <div className="px-[20px] pt-[4px] pb-[18px] text-center">
+          <div className="pb-[8px]">
+            <div className="h-[20px] flex items-center justify-center bg-fy27-surface">
+              <span className="h-[4px] w-[36px] rounded-[2px] bg-fy27-icon-secondary" />
+            </div>
+            <div className="px-[20px] pt-[4px] pb-[16px] text-center bg-fy27-surface">
               <p className="text-fy27-text-primary text-[20px]" style={{ fontWeight: 600, lineHeight: "26px" }}>
-                Settings
+                Audio-video settings
               </p>
             </div>
-            <div className="px-[20px] pb-[8px]">
-              <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
-                Microphone settings
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setAvSettingsView("microphone-settings")}
-              className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
-            >
-              <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
-                <MicOnIcon size={24} />
-              </span>
-              <span className="flex-1 text-[17px] leading-[22px] tracking-[-0.41px]">{preJoinVoiceNoiseModeLabel}</span>
-              <IconChevronRight size={20} className="text-fy27-icon-secondary" />
-            </button>
-            <div className="px-[20px] pt-[24px] pb-[8px]">
-              <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
+            <div className="px-[32px] pt-[16px] pb-[12px]">
+              <p className="text-fy27-text-primary text-[17px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
                 Video settings
               </p>
             </div>
+            <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
             <button
               type="button"
               onClick={() => setAvSettingsView("background-effects")}
-              className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
+              className="w-full min-h-[64px] px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
             >
               <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
                 <BackgroundEffectsIcon size={24} />
               </span>
-              <span className="flex-1 text-[17px] leading-[22px] tracking-[-0.41px]">Background effects</span>
+              <span className="flex-1 min-w-0 text-[17px] leading-[22px]">Background effects</span>
               <IconChevronRight size={20} className="text-fy27-icon-secondary" />
             </button>
-            <div className="mx-[20px] h-px bg-fy27-divider" />
-            <div className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-fy27-text-primary">
+            <div className="w-full min-h-[64px] px-[20px] py-[12px] flex items-center gap-[16px] text-fy27-text-primary">
               <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
-                <DesktopIcon size={24} />
+                <DesktopFriendlyIcon />
               </span>
               <span className="flex-1 min-w-0">
-                <span className="block text-[17px] leading-[22px] tracking-[-0.41px]">Desktop-friendly view</span>
-                <span className="block text-fy27-text-secondary text-[13px] leading-[18px] mt-[1px]">Crops the top and bottom to fill a widescreen frame</span>
+                <span className="block text-[17px] leading-[22px]">Desktop-friendly view</span>
+                <span className="block text-fy27-text-secondary text-[13px] leading-[18px] mt-[1px]">Crops your video to 16:9 feed</span>
               </span>
               <button
                 type="button"
@@ -617,6 +612,24 @@ export function PreJoinPage() {
                 className={`relative w-[52px] h-[32px] rounded-full shrink-0 transition-colors ${isDesktopFriendlyView ? "bg-fy27-brand" : "bg-fy27-icon-disabled"}`}
               >
                 <span className={`absolute left-0 top-[2px] size-[28px] rounded-full bg-white shadow-sm transition-transform ${isDesktopFriendlyView ? "translate-x-[22px]" : "translate-x-[2px]"}`} />
+              </button>
+            </div>
+            </div>
+            <div className="px-[32px] pt-[16px] pb-[12px]">
+              <p className="text-fy27-text-primary text-[17px] font-semibold leading-[22px]">Microphone settings</p>
+            </div>
+            <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setAvSettingsView("microphone-settings")}
+                className="w-full min-h-[64px] px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
+              >
+                <AudioSettingIcon mode={preJoinVoiceNoiseMode} />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[17px] leading-[22px]">{preJoinVoiceNoiseModeLabel}</span>
+                  <span className="block text-[13px] leading-[18px] text-fy27-text-secondary mt-[1px]">{preJoinVoiceNoiseModeDescription}</span>
+                </span>
+                <IconChevronRight size={20} className="shrink-0 text-fy27-icon-secondary" />
               </button>
             </div>
           </div>
@@ -633,6 +646,7 @@ export function PreJoinPage() {
                 </button>
                 <p className="flex-1 pr-[40px] text-center text-fy27-text-primary text-[20px] leading-[26px] font-semibold">Microphone settings</p>
               </div>
+              <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
               {([
                 { id: "off", label: "Default", description: "No additional filtering" },
                 { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
@@ -640,35 +654,17 @@ export function PreJoinPage() {
               ] as const).map((option) => {
                 const isSelected = preJoinVoiceNoiseMode === option.id;
                 return (
-                  <button
+                  <AudioSettingListRow
                     key={option.id}
-                    type="button"
+                    mode={option.id}
+                    label={option.label}
+                    description={option.description}
+                    isSelected={isSelected}
                     onClick={() => handleSelectPreJoinVoiceNoiseMode(option.id)}
-                    className="w-full px-[20px] py-[12px] flex items-start gap-[16px] text-left text-fy27-text-primary active:opacity-70"
-                  >
-                    <span
-                      className={`mt-[2px] inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${
-                        isSelected
-                          ? "bg-fy27-brand border-fy27-brand text-white"
-                          : "border-fy27-icon-secondary text-transparent"
-                      }`}
-                      aria-hidden="true"
-                    >
-                      {isSelected ? (
-                        <IconCheck size={12} />
-                      ) : null}
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-fy27-text-primary" style={{ fontSize: "17px", letterSpacing: "-0.41px", lineHeight: "22px" }}>
-                        {option.label}
-                      </span>
-                      <span className="block text-fy27-text-secondary mt-[1px]" style={{ fontSize: "13px", lineHeight: "18px" }}>
-                        {option.description}
-                      </span>
-                    </span>
-                  </button>
+                  />
                 );
               })}
+              </div>
             </div>
           ) : (
             <div className="py-[4px]">
