@@ -13,6 +13,7 @@ import { useCamera } from "@/app/components/CameraContext";
 import { useActiveMeeting } from "@/app/components/ActiveMeetingContext";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import { VoiceIsolationConsentSheet } from "@/app/components/VoiceIsolationConsentSheet";
+import { useToast } from "@/app/components/ToastContext";
 import { useVersion } from "@/app/versioning/VersionContext";
 import { isMvpFamily } from "@/app/versioning/versions";
 
@@ -72,6 +73,7 @@ function AnimatedDots() {
 export function PreJoinPage() {
   const navigate = useNavigate();
   const meeting = useActiveMeeting();
+  const { show: showToast } = useToast();
   // Final Vision keeps the original round-pill Join button (Figma Make baseline
   // `ButtonsOnPreJoin` → rounded-[50px]); FY27 MVP uses the Teams 2 iOS Accent
   // button (rounded-[8px], Figma 1143:60669).
@@ -191,6 +193,7 @@ export function PreJoinPage() {
     }
     setPreJoinVoiceNoiseMode("voice-isolation");
     setIsVoiceIsolationConsentOpen(false);
+    showToast("Voice profile creation starts in meeting", "voice-isolation");
   };
 
   const handleDenyVoiceIsolationConsent = () => {
