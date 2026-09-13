@@ -75,7 +75,7 @@ interface MorePanelProps {
   onDesktopFriendlyViewToggle?: () => void;
 }
 
-type NestedView = "main" | "meetingInfo" | "meetingSettings" | "share" | "shareScreen" | "participants" | "avSettings" | "avSettingsBackgroundEffects";
+type NestedView = "main" | "meetingInfo" | "meetingSettings" | "share" | "shareScreen" | "participants" | "microphoneSettings" | "videoSettings" | "videoSettingsBackgroundEffects";
 
 // Fluent "Closed Caption Off" glyph (Figma POR 1496:15097), shown on the grid
 // tile when live captions are on (tap → hide captions). viewBox 0 0 20 20.
@@ -399,10 +399,19 @@ export function MorePanel({
                   {enableVoiceNoiseControl && (
                     <MvpListRow
                       icon={<svg className="size-[24px]" fill="none" viewBox="0 0 24 24"><path d={svgPathsSettings.p366d01f0} fill="currentColor" /></svg>}
-                      label="A/V settings"
+                      label="Microphone settings"
                       subtitle={voiceNoiseModeLabel}
                       trailing={<ChevronRightIcon size={12} />}
-                      onClick={() => setCurrentView("avSettings")}
+                      onClick={() => setCurrentView("microphoneSettings")}
+                    />
+                  )}
+                  {enableVoiceNoiseControl && (
+                    <MvpListRow
+                      icon={<BackgroundEffectsIcon size={20} />}
+                      label="Video settings"
+                      subtitle={backgroundEffect === "blur" ? "Blur" : "None"}
+                      trailing={<ChevronRightIcon size={12} />}
+                      onClick={() => setCurrentView("videoSettings")}
                     />
                   )}
                   <MvpListRow
@@ -650,10 +659,19 @@ export function MorePanel({
               {enableVoiceNoiseControl && (
                 <MvpListRow
                   icon={<svg className="size-[24px]" fill="none" viewBox="0 0 24 24"><path d={svgPathsSettings.p366d01f0} fill="currentColor" /></svg>}
-                  label="A/V settings"
+                  label="Microphone settings"
                   subtitle={voiceNoiseModeLabel}
                   trailing={<ChevronRightIcon size={12} />}
-                  onClick={() => setCurrentView("avSettings")}
+                  onClick={() => setCurrentView("microphoneSettings")}
+                />
+              )}
+              {enableVoiceNoiseControl && (
+                <MvpListRow
+                  icon={<BackgroundEffectsIcon size={20} />}
+                  label="Video settings"
+                  subtitle={backgroundEffect === "blur" ? "Blur" : "None"}
+                  trailing={<ChevronRightIcon size={12} />}
+                  onClick={() => setCurrentView("videoSettings")}
                 />
               )}
               <MvpListRow
@@ -746,10 +764,7 @@ export function MorePanel({
     );
   }
 
-  // Consolidated A/V settings (MVP checkpoint scope) — mirrors the pre-join
-  // AV settings sheet: inline microphone-mode list + a Background effects
-  // row that drills into its own sub-view.
-  if (currentView === "avSettings") {
+  if (currentView === "microphoneSettings") {
     const options: Array<{
       id: "off" | "noise-suppression" | "voice-isolation";
       label: string;
@@ -762,18 +777,13 @@ export function MorePanel({
 
     return (
       <MultitaskingPanel
-        title="A/V settings"
+        title="Microphone settings"
         onClose={handleBackToMain}
         actionButton={undefined}
         showFooter={false}
         isNestedView={true}
       >
         <div className="flex-1 overflow-y-auto bg-transparent pt-[20px] pb-[16px]">
-          <div className="px-[20px] pb-[8px]">
-            <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
-              Microphone settings
-            </p>
-          </div>
           <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
             {options.map((option, idx) => {
               const isActive = voiceNoiseMode === option.id;
@@ -791,18 +801,28 @@ export function MorePanel({
             })}
           </div>
 
-          <div className="px-[20px] pt-[24px] pb-[8px]">
-            <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
-              Video settings
-            </p>
-          </div>
+        </div>
+      </MultitaskingPanel>
+    );
+  }
+
+  if (currentView === "videoSettings") {
+    return (
+      <MultitaskingPanel
+        title="Video settings"
+        onClose={handleBackToMain}
+        actionButton={undefined}
+        showFooter={false}
+        isNestedView={true}
+      >
+        <div className="flex-1 overflow-y-auto bg-transparent pt-[20px] pb-[16px]">
           <div className="mx-[16px] rounded-[16px] bg-fy27-surface overflow-hidden">
             <MvpListRow
               icon={<BackgroundEffectsIcon size={20} />}
               label="Background effects"
               subtitle={backgroundEffect === "blur" ? "Blur" : "None"}
               trailing={<ChevronRightIcon size={12} />}
-              onClick={() => setCurrentView("avSettingsBackgroundEffects")}
+              onClick={() => setCurrentView("videoSettingsBackgroundEffects")}
             />
             <div className="mx-[20px] h-px bg-fy27-divider" />
             <div className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-fy27-text-primary">
@@ -830,12 +850,11 @@ export function MorePanel({
     );
   }
 
-  // Background effects sub-view, nested under A/V settings (mirrors pre-join).
-  if (currentView === "avSettingsBackgroundEffects") {
+  if (currentView === "videoSettingsBackgroundEffects") {
     return (
       <MultitaskingPanel
         title="Background effects"
-        onClose={() => setCurrentView("avSettings")}
+        onClose={() => setCurrentView("videoSettings")}
         actionButton={undefined}
         showFooter={false}
         isNestedView={true}

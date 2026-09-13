@@ -85,7 +85,7 @@ export function PreJoinPage() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [preJoinVoiceNoiseMode, setPreJoinVoiceNoiseMode] = useState<"off" | "noise-suppression" | "voice-isolation">(meeting.voiceNoiseMode);
   const [isAvSettingsSheetOpen, setIsAvSettingsSheetOpen] = useState(false);
-  const [avSettingsView, setAvSettingsView] = useState<"main" | "background-effects">("main");
+  const [avSettingsView, setAvSettingsView] = useState<"main" | "background-effects" | "microphone-settings">("main");
   const [backgroundEffect, setBackgroundEffect] = useState<"none" | "blur">("none");
   const [isDesktopFriendlyView, setIsDesktopFriendlyView] = useState(false);
   const [isVoiceIsolationConsentOpen, setIsVoiceIsolationConsentOpen] = useState(false);
@@ -197,6 +197,12 @@ export function PreJoinPage() {
     // Keep existing mode unchanged (off or noise suppression).
     setIsVoiceIsolationConsentOpen(false);
   };
+
+  const preJoinVoiceNoiseModeLabel = preJoinVoiceNoiseMode === "off"
+    ? "Default"
+    : preJoinVoiceNoiseMode === "noise-suppression"
+      ? "Noise suppression"
+      : "Voice isolation";
 
   const handleBack = () => {
     navigate("/calendar", { replace: true });
@@ -563,42 +569,17 @@ export function PreJoinPage() {
                 Microphone settings
               </p>
             </div>
-            {([
-              { id: "off", label: "Default", description: "No additional filtering" },
-              { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
-              { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
-            ] as const).map((option) => {
-              const isSelected = preJoinVoiceNoiseMode === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => handleSelectPreJoinVoiceNoiseMode(option.id)}
-                  className="w-full px-[20px] py-[12px] flex items-start gap-[16px] text-left text-fy27-text-primary active:opacity-70"
-                >
-                  <span
-                    className={`mt-[2px] inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${
-                      isSelected
-                        ? "bg-fy27-brand border-fy27-brand text-white"
-                        : "border-fy27-icon-secondary text-transparent"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {isSelected ? (
-                      <IconCheck size={12} />
-                    ) : null}
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-fy27-text-primary" style={{ fontSize: "17px", letterSpacing: "-0.41px", lineHeight: "22px" }}>
-                      {option.label}
-                    </span>
-                    <span className="block text-fy27-text-secondary mt-[1px]" style={{ fontSize: "13px", lineHeight: "18px" }}>
-                      {option.description}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              onClick={() => setAvSettingsView("microphone-settings")}
+              className="w-full px-[20px] py-[12px] flex items-center gap-[16px] text-left text-fy27-text-primary active:opacity-70"
+            >
+              <span className="size-[24px] shrink-0 inline-flex items-center justify-center" aria-hidden="true">
+                <MicOnIcon size={24} />
+              </span>
+              <span className="flex-1 text-[17px] leading-[22px] tracking-[-0.41px]">{preJoinVoiceNoiseModeLabel}</span>
+              <IconChevronRight size={20} className="text-fy27-icon-secondary" />
+            </button>
             <div className="px-[20px] pt-[24px] pb-[8px]">
               <p className="text-fy27-text-primary text-[17px] tracking-[-0.41px]" style={{ fontWeight: 600, lineHeight: "22px" }}>
                 Video settings
@@ -636,6 +617,56 @@ export function PreJoinPage() {
               </button>
             </div>
           </div>
+          ) : avSettingsView === "microphone-settings" ? (
+            <div className="py-[4px]">
+              <div className="px-[12px] pt-[4px] pb-[14px] flex items-center">
+                <button
+                  type="button"
+                  aria-label="Back to settings"
+                  onClick={() => setAvSettingsView("main")}
+                  className="size-[40px] inline-flex items-center justify-center text-fy27-icon-primary active:opacity-65"
+                >
+                  <IconChevronRight size={24} className="rotate-180" />
+                </button>
+                <p className="flex-1 pr-[40px] text-center text-fy27-text-primary text-[20px] leading-[26px] font-semibold">Microphone settings</p>
+              </div>
+              {([
+                { id: "off", label: "Default", description: "No additional filtering" },
+                { id: "noise-suppression", label: "Noise suppression", description: "Reduces background noise" },
+                { id: "voice-isolation", label: "Voice isolation", description: "Keeps only your voice audible" },
+              ] as const).map((option) => {
+                const isSelected = preJoinVoiceNoiseMode === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => handleSelectPreJoinVoiceNoiseMode(option.id)}
+                    className="w-full px-[20px] py-[12px] flex items-start gap-[16px] text-left text-fy27-text-primary active:opacity-70"
+                  >
+                    <span
+                      className={`mt-[2px] inline-flex items-center justify-center size-[20px] rounded-full border shrink-0 ${
+                        isSelected
+                          ? "bg-fy27-brand border-fy27-brand text-white"
+                          : "border-fy27-icon-secondary text-transparent"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {isSelected ? (
+                        <IconCheck size={12} />
+                      ) : null}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-fy27-text-primary" style={{ fontSize: "17px", letterSpacing: "-0.41px", lineHeight: "22px" }}>
+                        {option.label}
+                      </span>
+                      <span className="block text-fy27-text-secondary mt-[1px]" style={{ fontSize: "13px", lineHeight: "18px" }}>
+                        {option.description}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           ) : (
             <div className="py-[4px]">
               <div className="px-[12px] pt-[4px] pb-[14px] flex items-center">
