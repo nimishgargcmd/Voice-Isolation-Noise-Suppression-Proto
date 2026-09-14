@@ -34,6 +34,7 @@ import { useActiveMeeting, type AgendaItem } from "@/app/components/ActiveMeetin
 import { useCamera } from "@/app/components/CameraContext";
 import { AudioModeProvider } from "@/app/components/AudioModeContext";
 import { AudioSettingListRow } from "@/app/components/AudioSettingListRow";
+import { playToggleTone } from "@/app/lib/toggleTone";
 import { VoiceIsolationConsentSheet } from "@/app/components/VoiceIsolationConsentSheet";
 
 // Import Figma placeholder images for chat avatars
@@ -469,26 +470,29 @@ export function MeetingPage() {
   const handleToggleControlsLock = useCallback(() => {
     setControlsLocked((prev) => {
       const next = !prev;
-      showToast(next ? "Mic & camera locked" : "Mic & camera unlocked");
+      showToast(next ? "Mic & camera locked" : "Mic & camera unlocked", undefined, { icon: next ? "lock" : "unlock" });
       return next;
     });
+  }, [showToast]);
+
+  // A single (non-unlocking) tap on a locked mic/camera button — nudge the user
+  // toward the unlock gesture instead of silently swallowing the tap.
+  const handleLockedSingleTap = useCallback(() => {
+    showToast("Double tap to unlock mic and camera", undefined, { icon: "info" });
   }, [showToast]);
 
   // Handle mic toggle with sound alerts
   const handleMicToggle = () => {
     const newMicState = !isMicOn;
     setIsMicOn(newMicState);
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    oscillator.frequency.value = newMicState ? 800 : 400;
-    oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
+    playToggleTone(newMicState);
+  };
+
+  // Handle video toggle with the same audio feedback as mic
+  const handleVideoToggle = () => {
+    const newVideoState = !isVideoOn;
+    setIsVideoOn(newVideoState);
+    playToggleTone(newVideoState);
   };
 
   // Handle emoji reaction
@@ -1260,7 +1264,7 @@ export function MeetingPage() {
                 onPanelToggle={handlePanelToggle}
                 isVideoOn={isVideoOn}
                 isMicOn={isMicOn}
-                onVideoToggle={() => setIsVideoOn(!isVideoOn)}
+                onVideoToggle={handleVideoToggle}
                 onMicToggle={handleMicToggle}
               />
             </div>
@@ -1274,13 +1278,14 @@ export function MeetingPage() {
             onPanelToggle={handlePanelToggle}
             isVideoOn={isAudioOnly ? false : isVideoOn}
             isMicOn={isMicOn}
-            onVideoToggle={() => setIsVideoOn(!isVideoOn)}
+            onVideoToggle={handleVideoToggle}
             onMicToggle={handleMicToggle}
             onMicLongPress={isMvpCheckpoint ? handleOpenVoiceNoiseSheet : undefined}
             micLongPressHintStyle={micLongPressHintStyle}
             videoDisabled={isAudioOnly}
             controlsLocked={controlsLocked}
             onUnlockControls={handleToggleControlsLock}
+            onLockedSingleTap={handleLockedSingleTap}
           />
         )}
 
@@ -1348,7 +1353,7 @@ export function MeetingPage() {
               onPanelToggle={handlePanelToggle}
               isVideoOn={isVideoOn}
               isMicOn={isMicOn}
-              onVideoToggle={() => setIsVideoOn(!isVideoOn)}
+              onVideoToggle={handleVideoToggle}
               onMicToggle={handleMicToggle}
             />
           </div>
@@ -1360,13 +1365,14 @@ export function MeetingPage() {
               onPanelToggle={handlePanelToggle}
               isVideoOn={isAudioOnly ? false : isVideoOn}
               isMicOn={isMicOn}
-              onVideoToggle={() => setIsVideoOn(!isVideoOn)}
+              onVideoToggle={handleVideoToggle}
               onMicToggle={handleMicToggle}
               onMicLongPress={isMvpCheckpoint ? handleOpenVoiceNoiseSheet : undefined}
               micLongPressHintStyle={micLongPressHintStyle}
               videoDisabled={isAudioOnly}
               controlsLocked={controlsLocked}
               onUnlockControls={handleToggleControlsLock}
+              onLockedSingleTap={handleLockedSingleTap}
             />
           </div>
         )}

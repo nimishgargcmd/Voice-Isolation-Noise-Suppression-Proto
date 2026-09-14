@@ -8,6 +8,7 @@ import { VideoOnIcon } from "@/app/components/VideoOnIcon";
 import { VideoOffIcon } from "@/app/components/VideoOffIcon";
 import { CallEnd } from "@/app/components/ubarIcons";
 import { IconChevronRight } from "@/app/components/profile/fluentIcons";
+import { playToggleTone } from "@/app/lib/toggleTone";
 
 type CallerKitState = "locked" | "unlocked";
 
@@ -68,12 +69,16 @@ export function CallerKitPage() {
 
   const handleMicTap = () => {
     // Mic stays instant-toggle in both locked and unlocked Caller Kit — no gating.
-    meeting.setMicOn(!meeting.isMicOn);
+    const next = !meeting.isMicOn;
+    meeting.setMicOn(next);
+    playToggleTone(next);
   };
 
   const handleCameraTap = () => {
     // Turning off never needs confirmation. Turning on: jump straight to the
     // meeting stage (camera still off) — the confirmation is shown THERE, not here.
+    // Audio feedback plays immediately on tap either way (matches the mic cue).
+    playToggleTone(!meeting.isVideoOn);
     if (meeting.isVideoOn) {
       meeting.setVideoOn(false);
       return;

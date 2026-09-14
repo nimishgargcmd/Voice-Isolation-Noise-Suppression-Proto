@@ -107,7 +107,7 @@ function TraySelfTile({
 
   // Long-press the sticky self tile opens the same options sheet as the floating
   // self tile (accidental-touch guard: "Lock mic & camera").
-  const { controlsLocked, openSelfOptions } = useSelfControls();
+  const { openSelfOptions } = useSelfControls();
   const longPress = useLongPress(openSelfOptions);
 
   return (
@@ -129,7 +129,6 @@ function TraySelfTile({
         showRotate={false}
         onFlipCamera={flipCamera}
         activeEmoji={activeEmoji}
-        locked={controlsLocked}
       />
     </div>
   );

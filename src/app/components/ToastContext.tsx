@@ -9,6 +9,8 @@ type ToastOptions = {
   iconMode?: Exclude<AudioMode, "off">;
   muted?: boolean;
   variant?: "success" | "error";
+  /** Accidental-touch guard: lock/unlock padlock glyph, or a generic info hint, instead of the default checkmark. */
+  icon?: "lock" | "unlock" | "info";
 };
 
 interface ToastContextValue {
@@ -24,13 +26,47 @@ export function useToast(): ToastContextValue {
   return ctx;
 }
 
+/** Closed padlock — shown when mic/camera controls just got locked. */
+function LockClosedGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" className="size-[16px] shrink-0" fill="currentColor" aria-hidden="true">
+      <path d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6h-1A1.5 1.5 0 0 0 2 7.5v6A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12.5 6h-1V4.5A3.5 3.5 0 0 0 8 1Zm2.5 5h-5V4.5a2.5 2.5 0 0 1 5 0V6Z" />
+    </svg>
+  );
+}
+
+/** Open padlock — shackle swung up and open to the right, clear of the body. */
+function LockOpenGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" className="size-[16px] shrink-0" aria-hidden="true">
+      <rect x="2" y="7" width="12" height="8" rx="1.5" fill="currentColor" />
+      <path
+        d="M4.5 7V5.25A3.25 3.25 0 0 1 10.5 3.25"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
+/** Info hint — used for gesture instructions (e.g. "Double tap to unlock") rather than a state change. */
+function InfoGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" className="size-[16px] shrink-0" fill="currentColor" aria-hidden="true">
+      <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm0 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM8 6.75c.38 0 .69.28.74.65l.01.1v4a.75.75 0 0 1-1.49.1V7.5c0-.41.34-.75.75-.75Zm0-3.25a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8Z" />
+    </svg>
+  );
+}
+
 /**
  * Teams 2 iOS "Toast bottom" pill (Figma 1015:54631) — surface/raised-fill,
  * rounded-12, Shadow 08, a 24px Checkmark-Circle + Body-2 text, both
  * text/secondary. Theme-aware. Shared by the app toast (MVP) and the
  * version-change indicator.
  */
-export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverride, mutedIcon = false, variant = "success" }: { message: string; nowrap?: boolean; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean; variant?: "success" | "error" }) {
+export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverride, mutedIcon = false, variant = "success", icon }: { message: string; nowrap?: boolean; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean; variant?: "success" | "error"; icon?: "lock" | "unlock" | "info" }) {
   const effectiveModeIcon = iconModeOverride ?? (modeIcon && modeIcon !== "off" ? modeIcon : undefined);
   const showModeIcon = !!effectiveModeIcon;
   const hideLeadingIcon = modeIcon === "off";
@@ -39,7 +75,9 @@ export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverr
       className={`inline-flex items-center gap-[8px] px-[16px] py-[16px] rounded-[12px] bg-fy27-surface-raised border-[0.5px] border-fy27-surface-raised text-fy27-text-secondary shadow-[0px_0px_2px_rgba(0,0,0,0.12),0px_4px_8px_rgba(0,0,0,0.14)] ${nowrap ? "w-max max-w-none" : "max-w-full"}`}
       style={{ fontFamily: "var(--font-sf-pro)" }}
     >
-      {variant === "error" ? (
+      {icon ? (
+        icon === "lock" ? <LockClosedGlyph /> : icon === "unlock" ? <LockOpenGlyph /> : <InfoGlyph />
+      ) : variant === "error" ? (
         <span className="inline-flex items-center justify-center size-[24px] rounded-full border border-fy27-icon-danger text-fy27-icon-danger shrink-0" aria-hidden="true">
           <IconDismiss size={12} />
         </span>
@@ -70,7 +108,7 @@ export function Fy27ToastPill({ message, nowrap = false, modeIcon, iconModeOverr
  * `relative` mobile frame). Auto-dismisses; a new toast replaces the current one.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toastState, setToastState] = useState<{ message: string; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean; variant?: "success" | "error" } | null>(null);
+  const [toastState, setToastState] = useState<{ message: string; modeIcon?: AudioMode; iconModeOverride?: Exclude<AudioMode, "off">; mutedIcon?: boolean; variant?: "success" | "error"; icon?: "lock" | "unlock" | "info" } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { activeVersionId } = useVersion();
   const isFy27Mvp = isMvpFamily(activeVersionId);
@@ -83,6 +121,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       iconModeOverride: options?.iconMode,
       mutedIcon: options?.muted,
       variant: options?.variant,
+      icon: options?.icon,
     });
     timer.current = setTimeout(() => setToastState(null), 2500);
   }, []);
@@ -103,6 +142,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 iconModeOverride={toastState.iconModeOverride}
                 mutedIcon={toastState.mutedIcon}
                 variant={toastState.variant}
+                icon={toastState.icon}
               />
             </div>
           ) : (

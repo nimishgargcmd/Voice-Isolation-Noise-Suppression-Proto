@@ -32,6 +32,8 @@ interface UBarProps {
   controlsLocked?: boolean;
   /** Fired when a double-tap on the (locked) mic or camera button is detected. */
   onUnlockControls?: () => void;
+  /** Fired on a single (non-unlocking) tap on a locked mic/camera button — e.g. to show a "Double tap to unlock" toast. */
+  onLockedSingleTap?: () => void;
   /** Max gap between taps counted as a double-tap while locked. */
   unlockDoubleTapMs?: number;
 }
@@ -43,15 +45,6 @@ function MicLongPressHint({ style }: { style: "chevron" | "none" }) {
   return (
     <svg className="block" width="10" height="10" viewBox="0 0 10 10" fill="none">
       <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-/** Small padlock badge — replaces the long-press hint while controls are locked. */
-function LockHint() {
-  return (
-    <svg className="block" width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6h-1A1.5 1.5 0 0 0 2 7.5v6A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12.5 6h-1V4.5A3.5 3.5 0 0 0 8 1Zm2.5 5h-5V4.5a2.5 2.5 0 0 1 5 0V6Z" />
     </svg>
   );
 }
@@ -123,6 +116,7 @@ export function UBar({
   videoDisabled = false,
   controlsLocked = false,
   onUnlockControls,
+  onLockedSingleTap,
   unlockDoubleTapMs = 350,
 }: UBarProps) {
   const chatOn = activePanel === "chat";
@@ -141,6 +135,7 @@ export function UBar({
       onUnlockControls?.();
     } else {
       lastLockedTapRef.current = { target, time: now };
+      onLockedSingleTap?.();
     }
   };
 
@@ -224,35 +219,25 @@ export function UBar({
             onClick={handleMicClick}
           >
             {isMicOn ? <Mic /> : <MicOff />}
-            {controlsLocked ? (
-              <span
-                aria-hidden="true"
-                className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary"
-                title="Locked — double-tap to unlock"
-              >
-                <LockHint />
-              </span>
-            ) : (
-              onMicLongPress && micLongPressHintStyle !== "none" && (
-                micLongPressHintStyle === "chevron" ? (
-                  <button
-                    type="button"
-                    className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary active:opacity-70"
-                    title="Open microphone settings"
-                    aria-label="Open microphone settings"
-                    onClick={handleMicHintTap}
-                  >
-                    <MicLongPressHint style={micLongPressHintStyle} />
-                  </button>
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary"
-                    title="Press and hold"
-                  >
-                    <MicLongPressHint style={micLongPressHintStyle} />
-                  </span>
-                )
+            {!controlsLocked && onMicLongPress && micLongPressHintStyle !== "none" && (
+              micLongPressHintStyle === "chevron" ? (
+                <button
+                  type="button"
+                  className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary active:opacity-70"
+                  title="Open microphone settings"
+                  aria-label="Open microphone settings"
+                  onClick={handleMicHintTap}
+                >
+                  <MicLongPressHint style={micLongPressHintStyle} />
+                </button>
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="absolute right-[5px] bottom-[5px] inline-flex items-center justify-center h-[14px] min-w-[14px] px-[2px] rounded-full border border-fy27-divider bg-fy27-surface-raised text-fy27-text-secondary"
+                  title="Press and hold"
+                >
+                  <MicLongPressHint style={micLongPressHintStyle} />
+                </span>
               )
             )}
           </button>

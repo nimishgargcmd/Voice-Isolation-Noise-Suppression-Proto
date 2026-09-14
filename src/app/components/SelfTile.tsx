@@ -92,17 +92,6 @@ export interface SelfTileProps {
   className?: string;
   /** A/V settings: crops the feed to a widescreen frame (mirrors PreJoinPage). */
   desktopFriendlyView?: boolean;
-  /** Mic/camera controls are locked against accidental taps — shows a padlock badge. */
-  locked?: boolean;
-}
-
-/** Small padlock glyph — shown on the tile while mic/camera controls are locked. */
-function LockGlyph() {
-  return (
-    <svg width={10} height={10} viewBox="0 0 16 16" fill="currentColor" style={{ display: "block" }}>
-      <path d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6h-1A1.5 1.5 0 0 0 2 7.5v6A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12.5 6h-1V4.5A3.5 3.5 0 0 0 8 1Zm2.5 5h-5V4.5a2.5 2.5 0 0 1 5 0V6Z" />
-    </svg>
-  );
 }
 
 export function SelfTile({
@@ -120,7 +109,6 @@ export function SelfTile({
   activeEmoji,
   className = "",
   desktopFriendlyView = false,
-  locked = false,
 }: SelfTileProps) {
   const audioMode = useAudioMode();
   const d = DIMS[orientation];
@@ -164,17 +152,6 @@ export function SelfTile({
 
       {/* Top gradient scrim (legibility for the corner controls) */}
       <div className="absolute inset-x-0 top-0 h-[40px] rounded-t-[4px] bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
-
-      {/* Accidental-touch guard — mic/camera controls locked. */}
-      {locked && (
-        <div
-          className="absolute top-[4px] left-1/2 -translate-x-1/2 flex items-center justify-center size-[16px] rounded-full bg-black/55 text-white pointer-events-none"
-          aria-hidden="true"
-          title="Mic/camera locked"
-        >
-          <LockGlyph />
-        </div>
-      )}
 
       {/* Reaction emoji — centered, fades in/out */}
       {currentEmoji && (

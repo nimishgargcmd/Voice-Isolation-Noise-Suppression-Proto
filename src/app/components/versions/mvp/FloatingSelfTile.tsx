@@ -39,7 +39,7 @@ export function FloatingSelfTile({
   const rotate = () => setOrientation((o) => (o === "portrait" ? "landscape" : "portrait"));
 
   const { stream, cameraError, acquireCamera, setTrackEnabled, attachVideo, facingMode, flipCamera } = useCamera();
-  const { controlsLocked, openSelfOptions } = useSelfControls();
+  const { openSelfOptions } = useSelfControls();
   const longPress = useLongPress(openSelfOptions);
 
   // Acquire the shared camera on mount; mirror the video on/off toggle to the track.
@@ -82,7 +82,6 @@ export function FloatingSelfTile({
         onFlipCamera={flipCamera}
         activeEmoji={activeEmoji}
         desktopFriendlyView={isDesktopFriendlyView}
-        locked={controlsLocked}
       />
     </div>
   );

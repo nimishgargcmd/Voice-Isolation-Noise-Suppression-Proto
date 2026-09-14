@@ -57,6 +57,31 @@ function OptionRow({ glyph, label, onClick }: { glyph: { vb: string; d: string }
   );
 }
 
+/** Toggle-style row (icon + label + switch) — same shape as MorePanel's Desktop-friendly view row. Flipping it does not auto-close the sheet. */
+function OptionToggleRow({ glyph, label, on, onToggle }: { glyph: { vb: string; d: string }; label: string; on: boolean; onToggle: () => void }) {
+  return (
+    <div
+      className="flex items-center gap-[20px] w-full px-[20px] py-[12px] pr-[12px] text-left"
+      style={{ fontFamily: "var(--font-sf-pro)" }}
+    >
+      <span className="grid size-[24px] place-items-center shrink-0 text-fy27-icon-primary">
+        <Glyph g={glyph} />
+      </span>
+      <span className="flex-1 text-[17px] leading-[22px] tracking-[-0.41px] font-normal text-fy27-text-primary">{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={label}
+        onClick={onToggle}
+        className={`relative w-[44px] h-[26px] rounded-full shrink-0 transition-colors ${on ? "bg-fy27-brand" : "bg-fy27-icon-disabled"}`}
+      >
+        <span className={`absolute left-0 top-[2px] size-[22px] rounded-full bg-white shadow-sm transition-transform ${on ? "translate-x-[18px]" : "translate-x-[2px]"}`} />
+      </button>
+    </div>
+  );
+}
+
 // Badge glyphs (icon-only, from Badge.tsx).
 function PersonQuestionGlyph() {
   return (
@@ -112,10 +137,11 @@ export function ParticipantOptionsSheet({ open, onClose, id, name, badge, contro
 
       {/* Self-only: accidental-touch guard — locks mic/camera to a double-tap-to-unlock. */}
       {isSelf && onToggleControlsLock && (
-        <OptionRow
+        <OptionToggleRow
           glyph={GLYPHS.lock}
-          label={controlsLocked ? "Unlock mic & camera" : "Lock mic & camera"}
-          onClick={run(onToggleControlsLock)}
+          label="Lock mic & camera"
+          on={!!controlsLocked}
+          onToggle={onToggleControlsLock}
         />
       )}
 
