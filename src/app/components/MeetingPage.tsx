@@ -313,6 +313,22 @@ export function MeetingPage() {
   const notificationIdRef = useRef(1);
   const notificationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const demoTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Recording notification alternates: odd triggers (1st, 3rd, ...) are indicator + voiceover
+  // only, even triggers (2nd, 4th, ...) surface the full banner.
+  const recordingNotificationCountRef = useRef(0);
+  const [recordingAnnouncement, setRecordingAnnouncement] = useState("");
+  const announceRecordingStarted = useCallback(() => {
+    const text = "Recording and transcription started";
+    // Clear-then-set on the next tick so repeated identical text still re-triggers VoiceOver/TalkBack.
+    setRecordingAnnouncement("");
+    window.setTimeout(() => setRecordingAnnouncement(text), 50);
+    // Speak it out loud too — aria-live is silent unless a real screen reader is running,
+    // and this proto needs to be audible when demoed in a plain browser.
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+    }
+  }, []);
   const demoVoicePromptTimerRef = useRef<NodeJS.Timeout | null>(null);
   const noisePromptSnoozeUntilRef = useRef(0);
   const voiceIsolationSpeakerPromptSnoozeUntilRef = useRef(0);
@@ -682,13 +698,20 @@ export function MeetingPage() {
 
   const handleRecordToggle = useCallback(() => {
     setIsRecording(true);
-    triggerNotification({
-      type: "critical",
-      icon: "recording",
-      heading: "Recording started",
-      body: "Recording and transcription have started in English (UK). By joining, you consent to this meeting being recorded. Privacy Policy",
-      dismiss: true,
-    });
+    recordingNotificationCountRef.current += 1;
+    const showRecordingBanner = recordingNotificationCountRef.current % 2 === 0;
+    if (showRecordingBanner) {
+      triggerNotification({
+        type: "critical",
+        icon: "recording",
+        heading: "Recording started",
+        body: "Recording and transcription have started in English (UK). By joining, you consent to this meeting being recorded. Privacy Policy",
+        dismiss: true,
+      });
+    } else {
+      // Notification manager stays silent — only the header indicator and a voiceover announcement fire.
+      announceRecordingStarted();
+    }
     demoTimerRef.current = setTimeout(() => {
       if (voiceNoiseModeRef.current === "off") {
         triggerNotification({
@@ -762,7 +785,7 @@ export function MeetingPage() {
         });
       }, 4500);
     }, 4500);
-  }, [triggerNotification, showToast, snoozeNoisePrompt, dismissNotification]);
+  }, [triggerNotification, showToast, snoozeNoisePrompt, dismissNotification, announceRecordingStarted]);
 
   const handleInterpreterToggle = useCallback(() => {
     triggerNotification({
@@ -1112,6 +1135,8 @@ export function MeetingPage() {
     <AudioModeProvider value={voiceNoiseMode}>
     <SelfControlsProvider controlsLocked={controlsLocked} onToggleControlsLock={handleToggleControlsLock}>
     <div className={meetingThemeClass} style={{ display: "contents" }}>
+      {/* Screen-reader-only announcement for the odd-numbered "indicator only" recording triggers */}
+      <span aria-live="assertive" className="sr-only">{recordingAnnouncement}</span>
       {/* Meeting Content - Vertical Stack */}
       <div className="absolute top-0 bottom-0 left-0 right-0 flex flex-col bg-fy27-surface pt-[59px]">
         {/* Immersive mode replaces the header + AIL with a minimal meeting-presence strip */}
