@@ -87,6 +87,11 @@ export function AccountSheet() {
     navigate(`/caller-kit/${state}`);
   };
 
+  const openSettings = () => {
+    close();
+    navigate("/settings");
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
@@ -143,7 +148,7 @@ export function AccountSheet() {
                 <Row icon={<IconWeather />} label="Meeting light theme"
                   trailing={<Toggle on={theme === "light"} label="Meeting light theme" onChange={(v) => setTheme(v ? "light" : "dark")} />} />
                 <Hair />
-                <Row icon={<IconSettings />} label="Settings" onClick={() => {}} />
+                <Row icon={<IconSettings />} label="Settings" onClick={openSettings} />
               </div>
             </div>
 

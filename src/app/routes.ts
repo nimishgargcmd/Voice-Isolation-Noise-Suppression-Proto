@@ -9,6 +9,8 @@ import { MeetingPage } from "@/app/components/MeetingPage";
 import { CallerKitPage } from "@/app/components/CallerKitPage";
 import { CatchupPage } from "@/app/components/CatchupPage";
 import { DMChatPage } from "@/app/components/DMChatPage";
+import { SettingsPage } from "@/app/components/SettingsPage";
+import { RecognitionPage } from "@/app/components/settings/RecognitionPage";
 import { AssetDownloader } from "@/app/components/AssetDownloader";
 
 export const router = createBrowserRouter(
@@ -36,6 +38,9 @@ export const router = createBrowserRouter(
         { path: "catchup", Component: CatchupPage },
         // 1:1 DM chat — sibling surface, no bottom nav; replicates the dock layering
         { path: "dm/:conversationId", Component: DMChatPage },
+        // Full-page Settings — reachable from Account → "Settings"
+        { path: "settings", Component: SettingsPage },
+        { path: "settings/recognition", Component: RecognitionPage },
       ],
     },
     { path: "/assets", Component: AssetDownloader },
