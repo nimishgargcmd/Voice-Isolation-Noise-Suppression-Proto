@@ -13,6 +13,7 @@ interface MeetingViewsProps {
   onCollapseSplit?: () => void;
   isContentSharing?: boolean;
   onEnterFullscreen?: () => void;
+  onOpenReflow?: () => void;
   isMicOn?: boolean;
   isVideoOn?: boolean;
   onMicToggle?: () => void;
@@ -27,6 +28,7 @@ export function MeetingViewsCheckpoint({
   onCollapseSplit,
   isContentSharing = false,
   onEnterFullscreen,
+  onOpenReflow,
   isMicOn,
   isVideoOn,
   isHandRaised,
@@ -39,6 +41,7 @@ export function MeetingViewsCheckpoint({
         onCollapseSplit={onCollapseSplit}
         isContentSharing={isContentSharing}
         onEnterFullscreen={onEnterFullscreen}
+        onOpenReflow={onOpenReflow}
         isMicOn={isMicOn}
         isVideoOn={isVideoOn}
         isHandRaised={isHandRaised}

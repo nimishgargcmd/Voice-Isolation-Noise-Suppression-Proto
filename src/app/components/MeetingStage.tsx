@@ -19,6 +19,7 @@ interface MeetingStageProps {
   onCollapseSplit?: () => void;
   isContentSharing?: boolean;
   onEnterFullscreen?: () => void;
+  onOpenReflow?: () => void;
 }
 
 /** Fullscreen maximize icon from Figma SVG (svg-ra71kde5x8 → p24e1e780) */
@@ -30,7 +31,7 @@ function FullScreenMaximizeIcon() {
   );
 }
 
-export function MeetingStage({ isSplit, onCollapseSplit, isContentSharing = false, onEnterFullscreen }: MeetingStageProps) {
+export function MeetingStage({ isSplit, onCollapseSplit, isContentSharing = false, onEnterFullscreen, onOpenReflow }: MeetingStageProps) {
   // Mock participant data (excluding self)
   // video: Optional video URL - when you have real videos, replace these placeholder URLs
   // image: Fallback static image that shows while video loads or if video fails
@@ -157,6 +158,9 @@ export function MeetingStage({ isSplit, onCollapseSplit, isContentSharing = fals
                 </p>
               </div>
               {/* Fullscreen expand button — Figma: bg-[rgba(255,255,255,0.2)], p-10, rounded-full, 20×20 icon */}
+              <button className="bg-[rgba(255,255,255,0.2)] p-[10px] rounded-[100px] flex items-center justify-center" onClick={(e) => { e.stopPropagation(); onOpenReflow?.(); }}>
+                <span className="text-white text-[12px] font-semibold px-[2px]">Aa</span>
+              </button>
               <button className="bg-[rgba(255,255,255,0.2)] p-[10px] rounded-[100px] flex items-center justify-center" onClick={(e) => { e.stopPropagation(); onEnterFullscreen?.(); }}>
                 <div className="size-[20px]">
                   <FullScreenMaximizeIcon />

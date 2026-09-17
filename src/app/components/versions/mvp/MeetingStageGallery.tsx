@@ -27,6 +27,7 @@ interface MeetingStageGalleryProps {
   onCollapseSplit?: () => void;
   isContentSharing?: boolean;
   onEnterFullscreen?: () => void;
+  onOpenReflow?: () => void;
 }
 
 const SHARER = "Aadi Kapoor";
@@ -42,6 +43,7 @@ export function MeetingStageGallery({
   onCollapseSplit,
   isContentSharing = false,
   onEnterFullscreen,
+  onOpenReflow,
 }: MeetingStageGalleryProps) {
   const { raisedHands, admittedParticipants, spotlightedIds, pinnedIds, removedIds } = useActiveMeeting();
   const [optionsFor, setOptionsFor] = useState<{ id: string; name: string; badge?: PersonBadge } | null>(null);
@@ -103,7 +105,7 @@ export function MeetingStageGallery({
     <div className="bg-fy27-surface flex flex-col relative h-full">
       <div className="flex-1 overflow-y-auto pb-[100px]">
         {/* Shared content — presenter slideshow share (Figma 996:37625) */}
-        {isContentSharing && <SharedContentShare sharerName={SHARER} onMaximize={onEnterFullscreen} />}
+        {isContentSharing && <SharedContentShare sharerName={SHARER} onMaximize={onEnterFullscreen} onReflow={onOpenReflow} />}
 
         {/* Gallery — tightly-packed 2-col grid of square tiles (hairline gutter, no padding) */}
         <div className="grid grid-cols-2 gap-[2px]">

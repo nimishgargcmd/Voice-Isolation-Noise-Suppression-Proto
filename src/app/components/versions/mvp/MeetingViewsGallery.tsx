@@ -17,6 +17,7 @@ interface MeetingViewsProps {
   onCollapseSplit?: () => void;
   isContentSharing?: boolean;
   onEnterFullscreen?: () => void;
+  onOpenReflow?: () => void;
   // ignored (kept so it drops into the SwipeableViews slot)
   isMicOn?: boolean;
   isVideoOn?: boolean;
@@ -31,6 +32,7 @@ export function MeetingViewsGallery({
   onCollapseSplit,
   isContentSharing = false,
   onEnterFullscreen,
+  onOpenReflow,
 }: MeetingViewsProps) {
   return (
     <div className="h-full w-full relative overflow-hidden bg-fy27-surface">
@@ -39,6 +41,7 @@ export function MeetingViewsGallery({
         onCollapseSplit={onCollapseSplit}
         isContentSharing={isContentSharing}
         onEnterFullscreen={onEnterFullscreen}
+        onOpenReflow={onOpenReflow}
       />
     </div>
   );
