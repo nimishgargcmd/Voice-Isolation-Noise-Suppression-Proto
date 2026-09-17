@@ -15,7 +15,6 @@ interface SwipeableViewsProps {
   onViewChange?: (viewIndex: number) => void;
   isContentSharing?: boolean;
   onEnterFullscreen?: () => void;
-  onOpenReflow?: () => void;
 }
 
 export function SwipeableViews({
@@ -29,7 +28,6 @@ export function SwipeableViews({
   onViewChange,
   isContentSharing = false,
   onEnterFullscreen,
-  onOpenReflow,
 }: SwipeableViewsProps) {
   const [currentIndex, setCurrentIndex] = useState(1); // 0: OnTheGo, 1: Gallery, 2: Focus
   const [isDragging, setIsDragging] = useState(false);
@@ -248,12 +246,12 @@ export function SwipeableViews({
 
         {/* View 1: Gallery Mode */}
         <div className="h-full flex-shrink-0 bg-black" style={slideStyle}>
-          <MeetingStage isSplit={isSplit} onCollapseSplit={onCollapseSplit} isContentSharing={isContentSharing} onEnterFullscreen={onEnterFullscreen} onOpenReflow={onOpenReflow} />
+          <MeetingStage isSplit={isSplit} onCollapseSplit={onCollapseSplit} isContentSharing={isContentSharing} onEnterFullscreen={onEnterFullscreen} />
         </div>
 
         {/* View 2: Focus Mode */}
         <div className="h-full flex-shrink-0 bg-black" style={slideStyle}>
-          <FocusMode isSplit={isSplit} onCollapseSplit={onCollapseSplit} isContentSharing={isContentSharing} onEnterFullscreen={onEnterFullscreen} onOpenReflow={onOpenReflow} />
+          <FocusMode isSplit={isSplit} onCollapseSplit={onCollapseSplit} isContentSharing={isContentSharing} onEnterFullscreen={onEnterFullscreen} />
         </div>
       </div>
 

@@ -1,18 +1,13 @@
+import imgSlideshow from "@/assets/figma/shared-content/slideshow-share.png";
 import { SlideshowControlBar } from "@/app/components/versions/mvp/SlideshowControlBar";
-import { OriginalSlideDeckStrip } from "@/app/components/DemoSlideDeck";
 
 /**
  * Presenter slideshow share — Figma `996:37625` (Mobile Meeting Redesign).
  * Full-width stack: shared slide (224) · slideshow control bar (48) · name-tag bar (52).
  * MVP-only; shown in the gallery when content sharing is active.
  *
- * The shared-slide area shows the 6-slide demo deck in its original
- * (unreflowed) form via `OriginalSlideDeckStrip` — a horizontally scrollable,
- * snap-paged strip, one slide filling the frame at a time (brainstorming/
- * screensharing idea 2 — see notes.md). Buttons (prev/next, To presenter,
- * Take control) are demo no-ops; the bottom-right maximize button opens the
- * fullscreen content view via `onMaximize`. The "Aa" button opens the opt-in
- * Liquid Mode-style easy-read/reflow prototype via `onReflow`.
+ * Buttons (prev/next, To presenter, Take control) are demo no-ops; the bottom-right
+ * maximize button opens the fullscreen content view via `onMaximize`.
  */
 
 /** Full-screen maximize (corner brackets) — Figma asset 996:37815 inner Shape. */
@@ -27,19 +22,7 @@ function MaximizeIcon() {
   );
 }
 
-/** Easy-read (reflow) entry point — a simple "Aa" glyph, distinct from Maximize. */
-function EasyReadIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-fy27-icon-interactive">
-      <path
-        d="M2.2 12L5.1 4h1.4l2.9 8H8.1l-.73-2.05H3.83L3.1 12H2.2Zm1.94-2.86h2.62L5.5 5.24 4.14 9.14ZM10.4 12.15c-.5 0-.92-.14-1.24-.42-.32-.28-.48-.66-.48-1.14 0-.53.2-.94.6-1.24.4-.3.94-.47 1.63-.51l1.2-.08v-.24c0-.36-.1-.63-.3-.81-.2-.18-.48-.27-.85-.27-.32 0-.58.07-.79.21-.2.14-.33.32-.4.55l-.9-.16c.1-.44.34-.79.71-1.05.37-.26.85-.39 1.42-.39.66 0 1.18.17 1.55.51.37.34.55.82.55 1.44v3.28h-.87l-.06-.68h-.03c-.16.25-.38.45-.65.6-.27.15-.6.22-.99.22Zm.24-.77c.42 0 .76-.12 1.02-.35.26-.24.39-.55.39-.94v-.33l-1.02.07c-.4.03-.7.11-.9.25-.2.14-.3.34-.3.6 0 .24.08.42.24.55.16.13.35.15.57.15Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-export function SharedContentShare({ sharerName, onMaximize, onReflow, splitLayout = false }: { sharerName: string; onMaximize?: () => void; onReflow?: () => void; splitLayout?: boolean }) {
+export function SharedContentShare({ sharerName, onMaximize, splitLayout = false }: { sharerName: string; onMaximize?: () => void; splitLayout?: boolean }) {
   const controlBar = <SlideshowControlBar fullWidth />;
 
   // Name-tag / fullscreen row.
@@ -51,14 +34,6 @@ export function SharedContentShare({ sharerName, onMaximize, onReflow, splitLayo
       <div className="flex-1" />
       <button
         type="button"
-        aria-label="Open easy read"
-        onClick={onReflow}
-        className="size-[52px] rounded-[8px] flex items-center justify-center shrink-0"
-      >
-        <EasyReadIcon />
-      </button>
-      <button
-        type="button"
         aria-label="Open shared content fullscreen"
         onClick={onMaximize}
         className="size-[52px] rounded-[8px] flex items-center justify-center shrink-0"
@@ -68,15 +43,14 @@ export function SharedContentShare({ sharerName, onMaximize, onReflow, splitLayo
     </div>
   );
 
-
   // Checkpoint (split): fill the available height — slide centred in the upper
   // area; the nametag/fullscreen row then the slideshow control pinned to the
   // bottom with a 10px gap above the filmstrip.
   if (splitLayout) {
     return (
       <div className="w-full h-full flex flex-col overflow-hidden" style={{ fontFamily: "var(--font-sf-pro)" }}>
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <OriginalSlideDeckStrip />
+        <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+          <img src={imgSlideshow} alt={`${sharerName}'s shared content`} className="block w-full h-[224px] object-cover" />
         </div>
         {nametagRow}
         {controlBar}
@@ -87,10 +61,8 @@ export function SharedContentShare({ sharerName, onMaximize, onReflow, splitLayo
 
   return (
     <div className="w-full overflow-hidden rounded-[4px] bg-fy27-surface mb-[2px]" style={{ fontFamily: "var(--font-sf-pro)" }}>
-      {/* Shared slide deck — original form, scrollable */}
-      <div className="w-full h-[224px]">
-        <OriginalSlideDeckStrip />
-      </div>
+      {/* Shared slide */}
+      <img src={imgSlideshow} alt={`${sharerName}'s shared content`} className="block w-full h-[224px] object-cover" />
 
       {nametagRow}
       {controlBar}

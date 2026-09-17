@@ -23,10 +23,9 @@ interface FocusModeProps {
   onCollapseSplit?: () => void;
   isContentSharing?: boolean;
   onEnterFullscreen?: () => void;
-  onOpenReflow?: () => void;
 }
 
-export function FocusMode({ isSplit, onCollapseSplit, isContentSharing = false, onEnterFullscreen, onOpenReflow }: FocusModeProps) {
+export function FocusMode({ isSplit, onCollapseSplit, isContentSharing = false, onEnterFullscreen }: FocusModeProps) {
   // Mock participant data for focus mode
   const participants = [
     {
@@ -119,9 +118,6 @@ export function FocusMode({ isSplit, onCollapseSplit, isContentSharing = false, 
                 </p>
               </div>
               {/* Fullscreen expand button */}
-              <button className="bg-[rgba(255,255,255,0.2)] p-[10px] rounded-[100px] flex items-center justify-center" onClick={(e) => { e.stopPropagation(); onOpenReflow?.(); }}>
-                <span className="text-white text-[12px] font-semibold px-[2px]">Aa</span>
-              </button>
               <button className="bg-[rgba(255,255,255,0.2)] p-[10px] rounded-[100px] flex items-center justify-center" onClick={(e) => { e.stopPropagation(); onEnterFullscreen?.(); }}>
                 <div className="size-[20px]">
                   <FullScreenMaximizeIcon />

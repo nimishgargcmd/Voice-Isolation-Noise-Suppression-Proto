@@ -31,7 +31,6 @@ interface MeetingStageCheckpointProps {
   onCollapseSplit?: () => void;
   isContentSharing?: boolean;
   onEnterFullscreen?: () => void;
-  onOpenReflow?: () => void;
   isMicOn?: boolean;
   isVideoOn?: boolean;
   isHandRaised?: boolean;
@@ -54,7 +53,6 @@ export function MeetingStageCheckpoint({
   onCollapseSplit,
   isContentSharing = false,
   onEnterFullscreen,
-  onOpenReflow,
   isMicOn = true,
   isVideoOn = true,
   isHandRaised = false,
@@ -137,7 +135,7 @@ export function MeetingStageCheckpoint({
     return (
       <div className="bg-fy27-surface flex flex-col h-full">
         <div className="flex-1 min-h-0 overflow-hidden">
-          <SharedContentShare sharerName={SHARER} onMaximize={onEnterFullscreen} onReflow={onOpenReflow} splitLayout />
+          <SharedContentShare sharerName={SHARER} onMaximize={onEnterFullscreen} splitLayout />
         </div>
         {trayFor(allAsc)}
         {optionsSheet}
