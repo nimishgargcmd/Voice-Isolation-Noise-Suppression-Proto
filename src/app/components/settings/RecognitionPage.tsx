@@ -10,7 +10,7 @@ const T_BODY: React.CSSProperties = { letterSpacing: "-0.43px", lineHeight: "22p
  * Full-page Recognition privacy setting — reachable from Settings → "Recognition".
  * The "Opt out" + "Export" actions and the completed-profile pill only show once
  * the user has consented and a voice profile exists. Before consent, and after
- * opting out, the page collapses to a plain "No voice profile created" state.
+ * opting out, the page collapses to enrolment guidance instead.
  */
 export function RecognitionPage() {
   const navigate = useNavigate();
@@ -95,10 +95,15 @@ export function RecognitionPage() {
               </div>
             </>
           ) : (
-            /* No consent yet, or opted out — no profile, no export */
-            <span className="self-start inline-flex items-center h-[26px] px-[10px] rounded-full text-[12px] font-medium bg-fy27-surface-raised text-fy27-text-secondary">
-              No voice profile created
-            </span>
+            /* No consent yet, or opted out — status pill + guidance to enrol elsewhere */
+            <>
+              <span className="self-start inline-flex items-center h-[26px] px-[10px] rounded-full text-[12px] font-medium bg-fy27-surface-raised text-fy27-text-secondary">
+                No voice profile created
+              </span>
+              <p className="text-[13px] text-fy27-text-secondary" style={{ lineHeight: "18px" }}>
+                Enrol your voice from your meeting's audio settings or from the Recognition tab on your Teams desktop app.
+              </p>
+            </>
           )}
         </div>
       </div>
