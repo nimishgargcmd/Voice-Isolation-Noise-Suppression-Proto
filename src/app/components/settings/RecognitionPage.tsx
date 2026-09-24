@@ -10,11 +10,10 @@ type EnrollmentStatus = "complete" | "enrolling" | "none";
 
 /**
  * Full-page Recognition privacy setting — reachable from Settings → "Recognition".
- * The "Opt out" + "Export" actions and the completed-profile pill only show once
- * the user has consented and a voice profile exists ("complete"). Before consent,
- * and after opting out ("none"), the page collapses to enrolment guidance. While a
- * profile is being created from an in-meeting consent ("enrolling"), it's a plain
- * status variation of the "none" layout — no CTA either way.
+ * "Opt out" is available whenever a profile exists or is being created
+ * ("complete"/"enrolling"). The completed-profile pill + "Export" only show once
+ * enrolment has finished ("complete"). Before consent, and after opting out
+ * ("none"), the page collapses to enrolment guidance with no CTA.
  */
 export function RecognitionPage() {
   const navigate = useNavigate();
@@ -45,11 +44,11 @@ export function RecognitionPage() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide px-[16px] pb-[24px]">
         <div className="rounded-[16px] border border-fy27-divider bg-fy27-surface-card p-[16px] flex flex-col gap-[12px]">
-          {/* Title row — icon + name; opt out + info only once a profile exists */}
+          {/* Title row — icon + name; opt out + info once a profile exists or is enrolling */}
           <div className="flex items-start gap-[12px]">
             <span className="text-fy27-icon-primary mt-[1px]"><IconMicOutline /></span>
             <span className="flex-1 min-w-0 text-[15px] font-semibold text-fy27-text-primary" style={T_BODY}>Voice Recognition</span>
-            {status === "complete" && (
+            {(status === "complete" || status === "enrolling") && (
               <>
                 <button
                   onClick={handleOptOut}
@@ -101,7 +100,7 @@ export function RecognitionPage() {
           )}
 
           {status === "enrolling" && (
-            /* Consented and enrolling in a meeting right now — status only, no CTA */
+            /* Consented and enrolling in a meeting right now — opt out is available, no other CTA */
             <>
               <span className="self-start inline-flex items-center gap-[6px] h-[26px] px-[10px] rounded-full text-[12px] font-medium bg-fy27-accent-tertiary text-fy27-text-interactive">
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0 animate-spin">
