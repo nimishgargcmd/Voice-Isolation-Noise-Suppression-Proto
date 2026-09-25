@@ -107,7 +107,7 @@ export function RecognitionPage() {
                   <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth="1.75" opacity="0.3" />
                   <path d="M14.25 8a6.25 6.25 0 0 0-6.25-6.25" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
                 </svg>
-                Enrolling voice profile
+                Generating voice profile
               </span>
               <p className="text-[13px] text-fy27-text-secondary" style={{ lineHeight: "18px" }}>
                 Your voice profile is being created from your current meeting. This will update automatically once it's complete.
